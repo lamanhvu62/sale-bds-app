@@ -118,6 +118,27 @@ File `.env` chứa API keys (không commit lên Git):
 | dia_diem | TEXT | Địa điểm |
 | ghi_chu | TEXT | Ghi chú |
 | da_hoan_thanh | BOOLEAN | Đã xong chưa |
+## 🗄️ Database Schema
+
+### Bảng `du_an`
+| Cột | Kiểu | Ghi chú |
+|-----|------|---------|
+| id | BIGINT (PK) | Auto increment |
+| user_id | UUID (FK) | Người tạo |
+| ten | TEXT | NOT NULL |
+| chu_dau_tu | TEXT | |
+| vi_tri | TEXT | NOT NULL |
+| gia | TEXT | NOT NULL |
+| dien_tich | TEXT | |
+| loai_hinh | TEXT | Chung cư / Nhà phố / Biệt thự / Đất nền |
+| tien_ich | TEXT[] | Array tag |
+| tien_do | TEXT | dang-mo-ban / sap-mo-ban / da-ban-het / dang-xay |
+| hinh_anh | TEXT[] | Array URL từ Supabase Storage |
+| mo_ta | TEXT | |
+| link_tham_khao | TEXT | |
+
+### Storage Bucket
+- `du-an-anh`: Public bucket chứa ảnh dự án
 
 ## ✅ Đã hoàn thành
 - [x] Setup project Vite + React + Tailwind
