@@ -5,59 +5,54 @@ import { supabase } from '../services/supabase';
 
 // Map tên cột tiếng Việt → field trong database
 const FIELD_MAP = {
-  'tên': 'ten',
-  'ten': 'ten',
-  'họ tên': 'ten',
-  'ho ten': 'ten',
-  'họ và tên': 'ten',
-  'ho va ten': 'ten',
-  'name': 'ten',
-  'khách hàng': 'ten',
-  'khach hang': 'ten',
-  
-  'sđt': 'sdt',
-  'sdt': 'sdt',
-  'số điện thoại': 'sdt',
-  'so dien thoai': 'sdt',
-  'điện thoại': 'sdt',
-  'dien thoai': 'sdt',
-  'phone': 'sdt',
-  'mobile': 'sdt',
-  'tel': 'sdt',
-  
-  'nhu cầu': 'nhu_cau',
-  'nhu cau': 'nhu_cau',
-  'nhu cầu': 'nhu_cau',
-  'need': 'nhu_cau',
-  
-  'ngân sách': 'ngan_sach',
-  'ngan sach': 'ngan_sach',
-  'ngân sách': 'ngan_sach',
-  'budget': 'ngan_sach',
-  'khoảng giá': 'ngan_sach',
-  'khoang gia': 'ngan_sach',
-  
-  'khu vực': 'khu_vuc',
-  'khu vuc': 'khu_vuc',
-  'khu vực': 'khu_vuc',
-  'area': 'khu_vuc',
-  'địa bàn': 'khu_vuc',
-  'dia ban': 'khu_vuc',
-  
-  'nguồn': 'nguon',
-  'nguon': 'nguon',
-  'nguồn': 'nguon',
-  'source': 'nguon',
-  'kênh': 'nguon',
-  'kenh': 'nguon',
-  
-  'ghi chú': 'ghi_chu',
-  'ghi chu': 'ghi_chu',
-  'ghi chú': 'ghi_chu',
-  'note': 'ghi_chu',
-  'notes': 'ghi_chu',
-  'chú thích': 'ghi_chu',
-  'chu thich': 'ghi_chu',
+'tên': 'ten',
+'ten': 'ten',
+'họ tên': 'ten',
+'ho ten': 'ten',
+'họ và tên': 'ten',
+'ho va ten': 'ten',
+'name': 'ten',
+'khách hàng': 'ten',
+'khach hang': 'ten',
+
+'sđt': 'sdt',
+'sdt': 'sdt',
+'số điện thoại': 'sdt',
+'so dien thoai': 'sdt',
+'điện thoại': 'sdt',
+'dien thoai': 'sdt',
+'phone': 'sdt',
+'mobile': 'sdt',
+'tel': 'sdt',
+
+'nhu cầu': 'nhu_cau',
+'nhu cau': 'nhu_cau',
+'need': 'nhu_cau',
+
+'ngân sách': 'ngan_sach',
+'ngan sach': 'ngan_sach',
+'budget': 'ngan_sach',
+'khoảng giá': 'ngan_sach',
+'khoang gia': 'ngan_sach',
+
+'khu vực': 'khu_vuc',
+'khu vuc': 'khu_vuc',
+'area': 'khu_vuc',
+'địa bàn': 'khu_vuc',
+'dia ban': 'khu_vuc',
+
+'nguồn': 'nguon',
+'nguon': 'nguon',
+'source': 'nguon',
+'kênh': 'nguon',
+'kenh': 'nguon',
+
+'ghi chú': 'ghi_chu',
+'ghi chu': 'ghi_chu',
+'note': 'ghi_chu',
+'notes': 'ghi_chu',
+'chú thích': 'ghi_chu',
+'chu thich': 'ghi_chu',
 };
 
 const TRANG_THAI_MAP = {
@@ -73,7 +68,6 @@ const TRANG_THAI_MAP = {
 
 export default function ImportModal({ onClose, onSuccess }) {
   const [step, setStep] = useState(1); // 1: Upload, 2: Map columns, 3: Preview, 4: Importing
-  const [file, setFile] = useState(null);
   const [columns, setColumns] = useState([]); // Cột trong file
   const [previewData, setPreviewData] = useState([]); // 5 dòng đầu
   const [allData, setAllData] = useState([]); // Toàn bộ data
@@ -112,8 +106,6 @@ export default function ImportModal({ onClose, onSuccess }) {
       return;
     }
 
-    setFile(selectedFile);
-    
     // Đọc file
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -396,7 +388,6 @@ export default function ImportModal({ onClose, onSuccess }) {
               <div className="flex gap-3">
                 <button
                   onClick={() => {
-                    setFile(null);
                     setStep(1);
                   }}
                   className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"

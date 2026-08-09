@@ -26,22 +26,6 @@ export default function KhachHang() {
   const [showDetails, setShowDetails] = useState(false); // ← Toggle chi tiết
   const [showQuickAdd, setShowQuickAdd] = useState(false);
 
-  const [form, setForm] = useState({
-    ten: '',
-    sdt: '',
-    trangThai: 'tiem-nang',
-    nhuCau: '',
-    nganSach: '',
-    khuVuc: '',
-    nguon: '',
-    ghiChu: '',
-  });
-
-  // Load khách hàng từ Supabase
-  useEffect(() => {
-    fetchKhachHang();
-  }, []);
-
   const fetchKhachHang = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -56,6 +40,26 @@ export default function KhachHang() {
     }
     setLoading(false);
   };
+  
+  const [form, setForm] = useState({
+    ten: '',
+    sdt: '',
+    trangThai: 'tiem-nang',
+    nhuCau: '',
+    nganSach: '',
+    khuVuc: '',
+    nguon: '',
+    ghiChu: '',
+  });
+
+  // Load khách hàng từ Supabase
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void fetchKhachHang();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   // Filter & search
   const filteredList = khachHangList.filter(kh => {

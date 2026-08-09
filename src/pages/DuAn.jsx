@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Search, MapPin, DollarSign, Home, MoreVertical, X, Upload, ChevronLeft, ChevronRight, Copy, ExternalLink, Building2, Check } from 'lucide-react';
+import { Plus, Search, MapPin, DollarSign, Home, MoreVertical, X, Upload, ChevronLeft, ChevronRight, Copy, Check } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
 
@@ -33,6 +33,21 @@ export default function DuAn() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const fileInputRef = useRef(null);
 
+  const fetchDuAn = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('du_an')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Lỗi load dự án:', error);
+    } else {
+      setDuAnList(data || []);
+    }
+    setLoading(false);
+  };
+  
   const [form, setForm] = useState({
     ten: '',
     chu_dau_tu: '',
@@ -49,23 +64,12 @@ export default function DuAn() {
 
   // Load dự án
   useEffect(() => {
-    fetchDuAn();
+    const timeoutId = window.setTimeout(() => {
+      void fetchDuAn();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
-
-  const fetchDuAn = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('du_an')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Lỗi load dự án:', error);
-    } else {
-      setDuAnList(data || []);
-    }
-    setLoading(false);
-  };
 
   // Filter & search
   const filteredList = duAnList.filter(da => {
