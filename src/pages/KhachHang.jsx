@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, MapPin, MoreVertical, X, ChevronDown, ChevronUp, Zap, Upload, Sparkles } from 'lucide-react';
+import { Plus, Search, Phone, MapPin, MoreVertical, X, Upload, Sparkles, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
 import ImportModal from '../components/ImportModal';
 import QuickAddModal from '../components/QuickAddModal';
+import { useToast } from '../components/Toast';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const trangThaiConfig = {
   'tiem-nang': { label: 'Tiềm năng', color: 'bg-yellow-100 text-yellow-700' },
@@ -21,26 +23,14 @@ export default function KhachHang() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [showImport, setShowImport] = useState(false);
   const [editingKhach, setEditingKhach] = useState(null);
-  const [showDetails, setShowDetails] = useState(false); // ← Toggle chi tiết
+  const [showDetails, setShowDetails] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
 
-  const fetchKhachHang = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('khach_hang')
-      .select('*')
-      .order('created_at', { ascending: false });
+  const toast = useToast();
+  const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
-    if (error) {
-      console.error('Lỗi load khách hàng:', error);
-    } else {
-      setKhachHangList(data || []);
-    }
-    setLoading(false);
-  };
-  
   const [form, setForm] = useState({
     ten: '',
     sdt: '',
@@ -52,14 +42,25 @@ export default function KhachHang() {
     ghiChu: '',
   });
 
-  // Load khách hàng từ Supabase
+  // Load khách hàng
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void fetchKhachHang();
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
+    fetchKhachHang();
   }, []);
+
+  const fetchKhachHang = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('khach_hang')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast.error('Lỗi tải dữ liệu: ' + error.message);
+    } else {
+      setKhachHangList(data || []);
+    }
+    setLoading(false);
+  };
 
   // Filter & search
   const filteredList = khachHangList.filter(kh => {
@@ -73,7 +74,7 @@ export default function KhachHang() {
   const openAddForm = () => {
     setEditingKhach(null);
     setForm({ ten: '', sdt: '', trangThai: 'tiem-nang', nhuCau: '', nganSach: '', khuVuc: '', nguon: '', ghiChu: '' });
-    setShowDetails(false); // ← Mặc định ẩn chi tiết
+    setShowDetails(false);
     setShowForm(true);
   };
 
@@ -90,7 +91,6 @@ export default function KhachHang() {
       nguon: khach.nguon || '',
       ghiChu: khach.ghi_chu || '',
     });
-    // Khi sửa, tự động mở chi tiết nếu có data
     const hasDetail = khach.nhu_cau || khach.ngan_sach || khach.khu_vuc || khach.nguon || khach.ghi_chu;
     setShowDetails(hasDetail);
     setShowForm(true);
@@ -99,7 +99,7 @@ export default function KhachHang() {
   // Lưu khách hàng
   const handleSave = async () => {
     if (!form.ten.trim() || !form.sdt.trim()) {
-      alert('Vui lòng nhập tên và số điện thoại!');
+      toast.warning('Vui lòng nhập tên và số điện thoại!');
       return;
     }
 
@@ -124,38 +124,47 @@ export default function KhachHang() {
         .eq('id', editingKhach.id);
 
       if (error) {
-        alert('Lỗi cập nhật: ' + error.message);
+        toast.error('Lỗi cập nhật: ' + error.message);
         return;
       }
+      toast.success('Đã cập nhật khách hàng!');
     } else {
       const { error } = await supabase
         .from('khach_hang')
         .insert([khachData]);
 
       if (error) {
-        alert('Lỗi thêm mới: ' + error.message);
+        toast.error('Lỗi thêm mới: ' + error.message);
         return;
       }
+      toast.success('Đã thêm khách hàng mới!');
     }
 
     setShowForm(false);
     fetchKhachHang();
   };
 
-  // Xóa khách hàng
-  const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc muốn xóa khách hàng này?')) return;
+  // Xác nhận xóa
+  const handleDeleteRequest = (id) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Xóa khách hàng',
+      message: 'Bạn có chắc muốn xóa khách hàng này? Hành động này không thể hoàn tác.',
+      onConfirm: () => performDelete(id),
+    });
+  };
 
+  const performDelete = async (id) => {
     const { error } = await supabase
       .from('khach_hang')
       .delete()
       .eq('id', id);
 
     if (error) {
-      alert('Lỗi xóa: ' + error.message);
+      toast.error('Lỗi xóa: ' + error.message);
       return;
     }
-
+    toast.success('Đã xóa khách hàng!');
     fetchKhachHang();
   };
 
@@ -188,7 +197,7 @@ export default function KhachHang() {
               className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all"
             >
               <Plus className="w-4 h-4" />
-              Thêm mới
+              Thêm nhanh
             </button>
           </div>
         </div>
@@ -205,7 +214,7 @@ export default function KhachHang() {
           />
         </div>
 
-        {/* Filter + Quick stats */}
+        {/* Filter */}
         <div className="flex gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => setFilterStatus('all')}
@@ -270,7 +279,7 @@ export default function KhachHang() {
                     <button className="p-1 hover:bg-gray-100 rounded">
                       <MoreVertical className="w-4 h-4 text-gray-400" />
                     </button>
-                    <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-10 min-w-[100px] border">
+                    <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-10 min-w-[100px] border">
                       <button
                         onClick={() => openEditForm(kh)}
                         className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
@@ -278,7 +287,7 @@ export default function KhachHang() {
                         ✏️ Sửa
                       </button>
                       <button
-                        onClick={() => handleDelete(kh.id)}
+                        onClick={() => handleDeleteRequest(kh.id)}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
                       >
                         🗑️ Xóa
@@ -308,7 +317,6 @@ export default function KhachHang() {
         <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center animate-in fade-in">
           <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
 
-            {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -323,7 +331,6 @@ export default function KhachHang() {
               </button>
             </div>
 
-            {/* === FIELD BẮT BUỘC (luôn hiện) === */}
             <div className="space-y-3 mb-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -361,8 +368,8 @@ export default function KhachHang() {
                       type="button"
                       onClick={() => setForm({ ...form, trangThai: key })}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.trangThai === key
-                        ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                     >
                       {value.label}
@@ -372,7 +379,6 @@ export default function KhachHang() {
               </div>
             </div>
 
-            {/* === TOGGLE CHI TIẾT === */}
             <button
               type="button"
               onClick={() => setShowDetails(!showDetails)}
@@ -391,7 +397,6 @@ export default function KhachHang() {
               )}
             </button>
 
-            {/* === FIELD CHI TIẾT (ẩn/hiện) === */}
             {showDetails && (
               <div className="space-y-3 pt-2 border-t border-gray-100 animate-in slide-in-from-top-2">
                 <div>
@@ -403,8 +408,8 @@ export default function KhachHang() {
                         type="button"
                         onClick={() => setForm({ ...form, nhuCau: form.nhuCau === option ? '' : option })}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nhuCau === option
-                          ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
-                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}
                       >
                         {option}
@@ -445,8 +450,8 @@ export default function KhachHang() {
                         type="button"
                         onClick={() => setForm({ ...form, nguon: form.nguon === option ? '' : option })}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nguon === option
-                          ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
-                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}
                       >
                         {option}
@@ -468,7 +473,6 @@ export default function KhachHang() {
               </div>
             )}
 
-            {/* === NÚT LƯU === */}
             <div className="flex gap-3 mt-5 pt-3 border-t border-gray-100">
               <button
                 onClick={() => setShowForm(false)}
@@ -488,24 +492,35 @@ export default function KhachHang() {
         </div>
       )}
 
-      <BottomNav />
       {/* Import Modal */}
       {showImport && (
         <ImportModal
           onClose={() => setShowImport(false)}
-          onSuccess={() => fetchKhachHang()}
+          onSuccess={() => { setShowImport(false); fetchKhachHang(); toast.success('Import thành công!'); }}
         />
       )}
+
       {/* Quick Add Modal */}
       {showQuickAdd && (
         <QuickAddModal
           onClose={() => setShowQuickAdd(false)}
-          onSuccess={() => {
-            setShowQuickAdd(false);
-            fetchKhachHang();
-          }}
+          onSuccess={() => { setShowQuickAdd(false); fetchKhachHang(); toast.success('Đã thêm khách hàng!'); }}
         />
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        onClose={() => setConfirmState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => {
+          if (confirmState.onConfirm) confirmState.onConfirm();
+        }}
+        title={confirmState.title}
+        message={confirmState.message}
+        type="danger"
+      />
+
+      <BottomNav />
     </div>
   );
 }

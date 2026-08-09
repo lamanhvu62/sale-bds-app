@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Calculator, Home, PiggyBank, Calendar, Copy, TrendingDown } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import { useToast } from '../components/Toast';
 
 export default function CalculatorPage() {
   const [activeTab, setActiveTab] = useState('tong-gia');
@@ -21,6 +22,8 @@ export default function CalculatorPage() {
   const [phuongThuc, setPhuongThuc] = useState('giam-dan');
   const [showAmortization, setShowAmortization] = useState(false);
   const [amortizationData, setAmortizationData] = useState([]);
+
+  const toast = useToast();
 
   // ========== HELPER FUNCTIONS ==========
 
@@ -59,7 +62,6 @@ export default function CalculatorPage() {
   // Format hiển thị cho input (giữ nguyên giá trị người dùng nhập hoặc hiển thị số đã format)
   const displayMoneyInput = (value) => {
     if (typeof value === 'number') {
-      // Nếu là số từ auto-fill, hiển thị format cho dễ đọc (nhưng khi sửa sẽ thành chuỗi)
       return formatMoney(value);
     }
     return value; // Chuỗi người dùng nhập
@@ -96,7 +98,6 @@ export default function CalculatorPage() {
 
   // ========== TÍNH VAY NGÂN HÀNG ==========
   const calculateLoan = () => {
-    // Lấy số tiền vay: ưu tiên nhập tay, nếu không có thì lấy 70% tổng giá (nếu có)
     let soTien;
     if (soTienVay !== '' && soTienVay !== null) {
       soTien = toNumber(soTienVay);
@@ -152,8 +153,8 @@ export default function CalculatorPage() {
   // ========== HANDLERS ==========
   const handleAutoFillLoan = () => {
     if (totalResult && totalResult.tongTien) {
-      // Gán trực tiếp số (number) để tính toán chính xác
       setSoTienVay(totalResult.tongTien * 0.7);
+      toast.info('Đã tự điền 70% tổng giá căn hộ');
     }
   };
 
@@ -166,7 +167,7 @@ export default function CalculatorPage() {
         + `Chiết khấu: -${formatMoney(totalResult.tienChietKhau)}\n`
         + `👉 TỔNG: ${formatMoney(totalResult.tongTien)}`;
       navigator.clipboard.writeText(text);
-      alert('Đã copy kết quả!');
+      toast.success('Đã copy kết quả tổng giá!');
     } else if (activeTab === 'vay-ngan-hang' && loanResult) {
       const text = `🏦 TÍNH VAY NGÂN HÀNG\n`
         + `Số tiền vay: ${formatMoney(loanResult.soTien)}\n`
@@ -176,7 +177,9 @@ export default function CalculatorPage() {
         + `Tổng lãi: ${formatMoney(loanResult.tongLai)}\n`
         + `👉 TỔNG PHẢI TRẢ: ${formatMoney(loanResult.tongPhaiTra)}`;
       navigator.clipboard.writeText(text);
-      alert('Đã copy kết quả!');
+      toast.success('Đã copy kết quả vay!');
+    } else {
+      toast.warning('Chưa có kết quả để copy');
     }
   };
 

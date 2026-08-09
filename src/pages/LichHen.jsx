@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   Plus, ChevronLeft, ChevronRight, MapPin, Clock, User, Building2,
-  MoreVertical, X, Check, Calendar, Phone, AlertCircle
+  MoreVertical, X, Check, Calendar, Phone
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
+import { useToast } from '../components/Toast';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 // Helper: format ngày giờ
 const formatDate = (date) => {
@@ -16,7 +18,6 @@ const formatTime = (date) => {
 };
 
 const formatDateTimeLocal = (date) => {
-  // Convert to local datetime string for input[type="datetime-local"]
   const pad = (n) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
@@ -26,7 +27,7 @@ const getMonthData = (year, month) => {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const daysInMonth = lastDay.getDate();
-  const startDayOfWeek = firstDay.getDay(); // 0 = CN, 1 = T2, ..., 6 = T7
+  const startDayOfWeek = firstDay.getDay();
   return { firstDay, lastDay, daysInMonth, startDayOfWeek };
 };
 
@@ -34,14 +35,17 @@ export default function LichHen() {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState(today);
-  const [appointments, setAppointments] = useState([]); // tất cả lịch trong tháng
-  const [dayAppointments, setDayAppointments] = useState([]); // lịch của ngày được chọn
+  const [appointments, setAppointments] = useState([]);
+  const [dayAppointments, setDayAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingAppt, setEditingAppt] = useState(null);
   const [saving, setSaving] = useState(false);
   const [khachHangList, setKhachHangList] = useState([]);
   const [duAnList, setDuAnList] = useState([]);
+
+  const toast = useToast();
+  const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
   // Form state
   const [form, setForm] = useState({
@@ -90,7 +94,7 @@ export default function LichHen() {
       .order('thoi_gian', { ascending: true });
 
     if (error) {
-      console.error('Lỗi load lịch tháng:', error);
+      toast.error('Lỗi tải lịch tháng: ' + error.message);
     } else {
       setAppointments(data || []);
     }
@@ -116,7 +120,7 @@ export default function LichHen() {
     }
   };
 
-  // Tạo map: ngày -> có lịch hẹn không (để hiển thị chấm)
+  // Tạo map ngày -> có lịch hẹn không
   const appointmentsByDate = {};
   appointments.forEach((appt) => {
     const d = new Date(appt.thoi_gian);
@@ -137,7 +141,7 @@ export default function LichHen() {
     setSelectedDate(today);
   };
 
-  // Mở form thêm mới (mặc định ngày được chọn)
+  // Mở form thêm mới
   const openAddForm = () => {
     setEditingAppt(null);
     setForm({
@@ -171,7 +175,7 @@ export default function LichHen() {
   // Lưu lịch hẹn
   const handleSave = async () => {
     if (!form.tieu_de.trim() || !form.thoi_gian) {
-      alert('Vui lòng nhập tiêu đề và thời gian!');
+      toast.warning('Vui lòng nhập tiêu đề và thời gian!');
       return;
     }
 
@@ -191,17 +195,19 @@ export default function LichHen() {
     if (editingAppt) {
       const { error } = await supabase.from('lich_hen').update(apptData).eq('id', editingAppt.id);
       if (error) {
-        alert('Lỗi cập nhật: ' + error.message);
+        toast.error('Lỗi cập nhật: ' + error.message);
         setSaving(false);
         return;
       }
+      toast.success('Đã cập nhật lịch hẹn!');
     } else {
       const { error } = await supabase.from('lich_hen').insert([apptData]);
       if (error) {
-        alert('Lỗi thêm mới: ' + error.message);
+        toast.error('Lỗi thêm mới: ' + error.message);
         setSaving(false);
         return;
       }
+      toast.success('Đã thêm lịch hẹn mới!');
     }
 
     setSaving(false);
@@ -210,14 +216,23 @@ export default function LichHen() {
     fetchDayAppointments(selectedDate);
   };
 
-  // Xóa lịch hẹn
-  const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc muốn xóa lịch hẹn này?')) return;
+  // Mở Confirm xóa
+  const handleDeleteRequest = (id) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Xóa lịch hẹn',
+      message: 'Bạn có chắc muốn xóa lịch hẹn này? Hành động này không thể hoàn tác.',
+      onConfirm: () => performDelete(id),
+    });
+  };
+
+  const performDelete = async (id) => {
     const { error } = await supabase.from('lich_hen').delete().eq('id', id);
     if (error) {
-      alert('Lỗi xóa: ' + error.message);
+      toast.error('Lỗi xóa: ' + error.message);
       return;
     }
+    toast.success('Đã xóa lịch hẹn!');
     fetchMonthAppointments();
     fetchDayAppointments(selectedDate);
   };
@@ -229,9 +244,10 @@ export default function LichHen() {
       .update({ da_hoan_thanh: !appt.da_hoan_thanh })
       .eq('id', appt.id);
     if (error) {
-      alert('Lỗi cập nhật: ' + error.message);
+      toast.error('Lỗi cập nhật: ' + error.message);
       return;
     }
+    toast.success(appt.da_hoan_thanh ? 'Đã đánh dấu chưa hoàn thành' : 'Đã đánh dấu hoàn thành');
     fetchMonthAppointments();
     fetchDayAppointments(selectedDate);
   };
@@ -241,16 +257,14 @@ export default function LichHen() {
   const month = currentMonth.getMonth();
   const { daysInMonth, startDayOfWeek } = getMonthData(year, month);
 
-  // Tạo mảng ngày (bao gồm ngày trống đầu tháng)
   const calendarDays = [];
   for (let i = 0; i < startDayOfWeek; i++) {
-    calendarDays.push(null); // ô trống
+    calendarDays.push(null);
   }
   for (let d = 1; d <= daysInMonth; d++) {
     calendarDays.push(new Date(year, month, d));
   }
 
-  // Chia thành các tuần
   const weeks = [];
   let week = [];
   calendarDays.forEach((day, index) => {
@@ -303,7 +317,6 @@ export default function LichHen() {
 
         {/* Lịch tháng */}
         <div className="mt-2 bg-gray-50 rounded-xl p-2">
-          {/* Tên thứ */}
           <div className="grid grid-cols-7 mb-1">
             {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((thu) => (
               <div key={thu} className="text-center text-xs font-medium text-gray-500 py-1">
@@ -312,7 +325,6 @@ export default function LichHen() {
             ))}
           </div>
 
-          {/* Các tuần */}
           {weeks.map((week, wi) => (
             <div key={wi} className="grid grid-cols-7">
               {week.map((day, di) => {
@@ -439,7 +451,7 @@ export default function LichHen() {
                       <button className="p-1.5 hover:bg-gray-100 rounded-full">
                         <MoreVertical className="w-4 h-4 text-gray-400" />
                       </button>
-                      <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-10 min-w-[100px] border">
+                      <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-10 min-w-[100px] border">
                         <button
                           onClick={() => openEditForm(appt)}
                           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
@@ -447,7 +459,7 @@ export default function LichHen() {
                           ✏️ Sửa
                         </button>
                         <button
-                          onClick={() => handleDelete(appt.id)}
+                          onClick={() => handleDeleteRequest(appt.id)}
                           className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
                         >
                           🗑️ Xóa
@@ -476,7 +488,6 @@ export default function LichHen() {
             </div>
 
             <div className="space-y-3">
-              {/* Tiêu đề */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tiêu đề <span className="text-red-500">*</span></label>
                 <input
@@ -488,7 +499,6 @@ export default function LichHen() {
                 />
               </div>
 
-              {/* Thời gian */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Thời gian <span className="text-red-500">*</span></label>
                 <input
@@ -499,7 +509,6 @@ export default function LichHen() {
                 />
               </div>
 
-              {/* Địa điểm */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Địa điểm</label>
                 <input
@@ -511,7 +520,6 @@ export default function LichHen() {
                 />
               </div>
 
-              {/* Khách hàng */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Khách hàng</label>
                 <select
@@ -528,7 +536,6 @@ export default function LichHen() {
                 </select>
               </div>
 
-              {/* Dự án */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Dự án</label>
                 <select
@@ -545,7 +552,6 @@ export default function LichHen() {
                 </select>
               </div>
 
-              {/* Ghi chú */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
                 <textarea
@@ -557,7 +563,6 @@ export default function LichHen() {
                 />
               </div>
 
-              {/* Đã hoàn thành */}
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -569,7 +574,6 @@ export default function LichHen() {
               </label>
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-3 mt-5 pt-3 border-t border-gray-100">
               <button
                 onClick={() => setShowForm(false)}
@@ -592,6 +596,18 @@ export default function LichHen() {
           </div>
         </div>
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        onClose={() => setConfirmState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => {
+          if (confirmState.onConfirm) confirmState.onConfirm();
+        }}
+        title={confirmState.title}
+        message={confirmState.message}
+        type="danger"
+      />
 
       <BottomNav />
     </div>
