@@ -1,0 +1,17 @@
+
+---
+
+## ✅ **Giờ project đã có đủ bộ "não"**
+
+| File | Vai trò | Đã cập nhật? |
+|------|---------|:---:|
+| `DEEPSEEK.md` | Định hướng cho AI | ✅ Vừa cập nhật |
+| `README.md` | Giới thiệu cho người đọc | ✅ Vừa cập nhật |
+| `services/supabase.js` | Kết nối backend | ✅ Đã có |
+| `App.jsx` | Auth guard + Router | ✅ Đã có |
+
+---
+
+Từ giờ mỗi lần chat với mình, bạn chỉ cần nói: **"Đọc DEEPSEEK.md rồi code tiếp trang Dự Án"** — mình sẽ không bị quên gì hết!
+
+**Muốn code trang Dự Án luôn không?** 🚀💚

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, MapPin, MoreVertical, X } from 'lucide-react';
+import { Plus, Search, Phone, MapPin, MoreVertical, X, ChevronDown, ChevronUp, Zap,Upload  } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
+import ImportModal from '../components/ImportModal';
 
 const trangThaiConfig = {
   'tiem-nang': { label: 'Tiềm năng', color: 'bg-yellow-100 text-yellow-700' },
@@ -10,22 +11,27 @@ const trangThaiConfig = {
   'da-mua': { label: 'Đã mua', color: 'bg-gray-100 text-gray-700' },
 };
 
+const nguonOptions = ['Facebook', 'Zalo', 'Website', 'Người quen giới thiệu', 'Gọi tới', 'Khác'];
+const nhuCauOptions = ['Mua chung cư', 'Mua nhà phố', 'Mua đất nền', 'Thuê chung cư', 'Thuê nhà phố', 'Khác'];
+
 export default function KhachHang() {
   const [khachHangList, setKhachHangList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [editingKhach, setEditingKhach] = useState(null);
+  const [showDetails, setShowDetails] = useState(false); // ← Toggle chi tiết
 
   const [form, setForm] = useState({
     ten: '',
     sdt: '',
+    trangThai: 'tiem-nang',
     nhuCau: '',
     nganSach: '',
     khuVuc: '',
     nguon: '',
-    trangThai: 'tiem-nang',
     ghiChu: '',
   });
 
@@ -53,54 +59,59 @@ export default function KhachHang() {
   const filteredList = khachHangList.filter(kh => {
     const matchStatus = filterStatus === 'all' || kh.trang_thai === filterStatus;
     const matchSearch = kh.ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        kh.sdt.includes(searchTerm);
+      kh.sdt.includes(searchTerm);
     return matchStatus && matchSearch;
   });
 
+  // Mở form thêm nhanh
   const openAddForm = () => {
     setEditingKhach(null);
-    setForm({ ten: '', sdt: '', nhuCau: '', nganSach: '', khuVuc: '', nguon: '', trangThai: 'tiem-nang', ghiChu: '' });
+    setForm({ ten: '', sdt: '', trangThai: 'tiem-nang', nhuCau: '', nganSach: '', khuVuc: '', nguon: '', ghiChu: '' });
+    setShowDetails(false); // ← Mặc định ẩn chi tiết
     setShowForm(true);
   };
 
+  // Mở form sửa
   const openEditForm = (khach) => {
     setEditingKhach(khach);
     setForm({
       ten: khach.ten,
       sdt: khach.sdt,
+      trangThai: khach.trang_thai,
       nhuCau: khach.nhu_cau || '',
       nganSach: khach.ngan_sach || '',
       khuVuc: khach.khu_vuc || '',
       nguon: khach.nguon || '',
-      trangThai: khach.trang_thai,
       ghiChu: khach.ghi_chu || '',
     });
+    // Khi sửa, tự động mở chi tiết nếu có data
+    const hasDetail = khach.nhu_cau || khach.ngan_sach || khach.khu_vuc || khach.nguon || khach.ghi_chu;
+    setShowDetails(hasDetail);
     setShowForm(true);
   };
 
   // Lưu khách hàng
   const handleSave = async () => {
-    if (!form.ten || !form.sdt) {
+    if (!form.ten.trim() || !form.sdt.trim()) {
       alert('Vui lòng nhập tên và số điện thoại!');
       return;
     }
 
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     const khachData = {
-      ten: form.ten,
-      sdt: form.sdt,
+      ten: form.ten.trim(),
+      sdt: form.sdt.trim(),
+      trang_thai: form.trangThai,
       nhu_cau: form.nhuCau,
       ngan_sach: form.nganSach,
       khu_vuc: form.khuVuc,
       nguon: form.nguon,
-      trang_thai: form.trangThai,
       ghi_chu: form.ghiChu,
       user_id: user.id,
     };
 
     if (editingKhach) {
-      // Cập nhật
       const { error } = await supabase
         .from('khach_hang')
         .update(khachData)
@@ -111,7 +122,6 @@ export default function KhachHang() {
         return;
       }
     } else {
-      // Thêm mới
       const { error } = await supabase
         .from('khach_hang')
         .insert([khachData]);
@@ -123,7 +133,7 @@ export default function KhachHang() {
     }
 
     setShowForm(false);
-    fetchKhachHang(); // Load lại danh sách
+    fetchKhachHang();
   };
 
   // Xóa khách hàng
@@ -140,8 +150,11 @@ export default function KhachHang() {
       return;
     }
 
-    fetchKhachHang(); // Load lại danh sách
+    fetchKhachHang();
   };
+
+  // Đếm nhanh
+  const countByStatus = (status) => khachHangList.filter(kh => kh.trang_thai === status).length;
 
   return (
     <div className="pb-20 max-w-lg mx-auto">
@@ -149,13 +162,22 @@ export default function KhachHang() {
       <div className="bg-white p-4 sticky top-0 z-10 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-lg font-bold text-gray-800">Khách hàng</h1>
-          <button
-            onClick={openAddForm}
-            className="bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700"
-          >
-            <Plus className="w-4 h-4" />
-            Thêm mới
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowImport(true)}
+              className="bg-white border border-gray-300 text-gray-700 px-3 py-2.5 rounded-lg flex items-center gap-1.5 text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all"
+            >
+              <Upload className="w-4 h-4" />
+              Import
+            </button>
+            <button
+              onClick={openAddForm}
+              className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm nhanh
+            </button>
+          </div>
         </div>
 
         {/* Search */}
@@ -170,25 +192,23 @@ export default function KhachHang() {
           />
         </div>
 
-        {/* Filter theo trạng thái */}
+        {/* Filter + Quick stats */}
         <div className="flex gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => setFilterStatus('all')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
-              filterStatus === 'all' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600'
-            }`}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${filterStatus === 'all' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600'
+              }`}
           >
-            Tất cả
+            Tất cả ({khachHangList.length})
           </button>
           {Object.entries(trangThaiConfig).map(([key, value]) => (
             <button
               key={key}
               onClick={() => setFilterStatus(key)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                filterStatus === key ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${filterStatus === key ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600'
+                }`}
             >
-              {value.label}
+              {value.label} ({countByStatus(key)})
             </button>
           ))}
         </div>
@@ -203,161 +223,252 @@ export default function KhachHang() {
           </div>
         ) : filteredList.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-400">Chưa có khách hàng nào</p>
-            <button onClick={openAddForm} className="text-emerald-600 text-sm mt-2">
+            <div className="text-4xl mb-3">📭</div>
+            <p className="text-gray-400">
+              {searchTerm ? 'Không tìm thấy khách hàng phù hợp' : 'Chưa có khách hàng nào'}
+            </p>
+            <button onClick={openAddForm} className="text-emerald-600 text-sm mt-2 font-medium">
               + Thêm khách hàng đầu tiên
             </button>
           </div>
         ) : (
           filteredList.map((kh) => (
-            <div key={kh.id} className="bg-white rounded-xl p-4 shadow-sm relative">
+            <div key={kh.id} className="bg-white rounded-xl p-4 shadow-sm relative group/card">
               <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800">{kh.ten}</h3>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-800 truncate">{kh.ten}</h3>
                   <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                    <Phone className="w-3.5 h-3.5" />
+                    <Phone className="w-3.5 h-3.5 flex-shrink-0" />
                     <span>{kh.sdt}</span>
                   </div>
                   {kh.khu_vuc && (
                     <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>{kh.khu_vuc}</span>
+                      <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="truncate">{kh.khu_vuc}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${trangThaiConfig[kh.trang_thai]?.color}`}>
-                    {trangThaiConfig[kh.trang_thai]?.label}
+                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${trangThaiConfig[kh.trang_thai]?.color || 'bg-gray-100 text-gray-700'}`}>
+                    {trangThaiConfig[kh.trang_thai]?.label || kh.trang_thai}
                   </span>
-                  <div className="relative group">
+                  <div className="relative group/menu">
                     <button className="p-1 hover:bg-gray-100 rounded">
                       <MoreVertical className="w-4 h-4 text-gray-400" />
                     </button>
-                    <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-1 hidden group-hover:block z-10 min-w-[100px]">
+                    <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-10 min-w-[100px] border">
                       <button
                         onClick={() => openEditForm(kh)}
                         className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                       >
-                        Sửa
+                        ✏️ Sửa
                       </button>
                       <button
                         onClick={() => handleDelete(kh.id)}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
                       >
-                        Xóa
+                        🗑️ Xóa
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* Tags */}
               <div className="mt-3 flex flex-wrap gap-2">
                 {kh.nhu_cau && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{kh.nhu_cau}</span>}
                 {kh.ngan_sach && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{kh.ngan_sach}</span>}
-                {kh.nguon && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{kh.nguon}</span>}
+                {kh.nguon && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">📌 {kh.nguon}</span>}
               </div>
 
               {kh.ghi_chu && (
-                <p className="mt-2 text-xs text-gray-400 italic">📝 {kh.ghi_chu}</p>
+                <p className="mt-2 text-xs text-gray-400 italic line-clamp-1">📝 {kh.ghi_chu}</p>
               )}
             </div>
           ))
         )}
       </div>
 
-      {/* Form Modal (giữ nguyên giao diện, chỉ sửa màu emerald) */}
+      {/* ========== FORM THÊM NHANH (MODAL) ========== */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center">
-          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center animate-in fade-in">
+          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
+
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">
-                {editingKhach ? 'Sửa khách hàng' : 'Thêm khách hàng mới'}
-              </h2>
-              <button onClick={() => setShowForm(false)} className="p-1 hover:bg-gray-100 rounded">
-                <X className="w-5 h-5" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-emerald-600" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-800">
+                  {editingKhach ? 'Sửa khách hàng' : 'Thêm khách hàng nhanh'}
+                </h2>
+              </div>
+              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            {/* === FIELD BẮT BUỘC (luôn hiện) === */}
+            <div className="space-y-3 mb-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tên khách hàng *</label>
-                <input type="text" value={form.ten} onChange={(e) => setForm({ ...form, ten: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="Nhập tên khách hàng" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tên khách hàng <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.ten}
+                  onChange={(e) => setForm({ ...form, ten: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="Nhập tên khách hàng"
+                  autoFocus
+                />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại *</label>
-                <input type="text" value={form.sdt} onChange={(e) => setForm({ ...form, sdt: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="Nhập số điện thoại" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Số điện thoại <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  value={form.sdt}
+                  onChange={(e) => setForm({ ...form, sdt: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="Nhập số điện thoại"
+                />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nhu cầu</label>
-                <select value={form.nhuCau} onChange={(e) => setForm({ ...form, nhuCau: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <option value="">Chọn nhu cầu</option>
-                  <option value="Mua chung cư">Mua chung cư</option>
-                  <option value="Mua nhà phố">Mua nhà phố</option>
-                  <option value="Mua đất nền">Mua đất nền</option>
-                  <option value="Thuê chung cư">Thuê chung cư</option>
-                  <option value="Thuê nhà phố">Thuê nhà phố</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ngân sách</label>
-                  <input type="text" value={form.nganSach} onChange={(e) => setForm({ ...form, nganSach: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    placeholder="VD: 2-3 tỷ" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                <div className="flex gap-2 flex-wrap">
+                  {Object.entries(trangThaiConfig).map(([key, value]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setForm({ ...form, trangThai: key })}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.trangThai === key
+                          ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        }`}
+                    >
+                      {value.label}
+                    </button>
+                  ))}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực</label>
-                  <input type="text" value={form.khuVuc} onChange={(e) => setForm({ ...form, khuVuc: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    placeholder="VD: Quận 2" />
-                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+            </div>
+
+            {/* === TOGGLE CHI TIẾT === */}
+            <button
+              type="button"
+              onClick={() => setShowDetails(!showDetails)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors mb-2"
+            >
+              {showDetails ? (
+                <>
+                  <ChevronUp className="w-4 h-4" />
+                  Ẩn chi tiết
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4" />
+                  Thêm chi tiết (nhu cầu, ngân sách...)
+                </>
+              )}
+            </button>
+
+            {/* === FIELD CHI TIẾT (ẩn/hiện) === */}
+            {showDetails && (
+              <div className="space-y-3 pt-2 border-t border-gray-100 animate-in slide-in-from-top-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nhu cầu</label>
+                  <div className="flex flex-wrap gap-2">
+                    {nhuCauOptions.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setForm({ ...form, nhuCau: form.nhuCau === option ? '' : option })}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nhuCau === option
+                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngân sách</label>
+                    <input
+                      type="text"
+                      value={form.nganSach}
+                      onChange={(e) => setForm({ ...form, nganSach: e.target.value })}
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="VD: 2-3 tỷ"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực</label>
+                    <input
+                      type="text"
+                      value={form.khuVuc}
+                      onChange={(e) => setForm({ ...form, khuVuc: e.target.value })}
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="VD: Quận 2, Thủ Đức"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nguồn khách</label>
-                  <select value={form.nguon} onChange={(e) => setForm({ ...form, nguon: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="">Chọn nguồn</option>
-                    <option value="Facebook">Facebook</option>
-                    <option value="Zalo">Zalo</option>
-                    <option value="Website">Website</option>
-                    <option value="Người quen giới thiệu">Người quen giới thiệu</option>
-                    <option value="Gọi tới">Gọi tới</option>
-                  </select>
+                  <div className="flex flex-wrap gap-2">
+                    {nguonOptions.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setForm({ ...form, nguon: form.nguon === option ? '' : option })}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nguon === option
+                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                  <select value={form.trangThai} onChange={(e) => setForm({ ...form, trangThai: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="tiem-nang">Tiềm năng</option>
-                    <option value="dang-cham">Đang chăm</option>
-                    <option value="sap-chot">Sắp chốt</option>
-                    <option value="da-mua">Đã mua</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-                <textarea value={form.ghiChu} onChange={(e) => setForm({ ...form, ghiChu: e.target.value })} rows={3}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="Ghi chú thêm về khách hàng..." />
-              </div>
-            </div>
 
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                  <textarea
+                    value={form.ghiChu}
+                    onChange={(e) => setForm({ ...form, ghiChu: e.target.value })}
+                    rows={2}
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Ghi chú nhanh..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* === NÚT LƯU === */}
+            <div className="flex gap-3 mt-5 pt-3 border-t border-gray-100">
+              <button
+                onClick={() => setShowForm(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
                 Hủy
               </button>
-              <button onClick={handleSave}
-                className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700">
-                {editingKhach ? 'Cập nhật' : 'Thêm mới'}
+              <button
+                onClick={handleSave}
+                className="flex-[2] px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <Zap className="w-4 h-4" />
+                {editingKhach ? 'Cập nhật' : 'Lưu ngay'}
               </button>
             </div>
           </div>
@@ -365,6 +476,13 @@ export default function KhachHang() {
       )}
 
       <BottomNav />
+      {/* Import Modal */}
+{showImport && (
+  <ImportModal
+    onClose={() => setShowImport(false)}
+    onSuccess={() => fetchKhachHang()}
+  />
+)}
     </div>
   );
 }
