@@ -14,7 +14,7 @@ export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 flex justify-around items-center max-w-lg mx-auto">
+    <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 border-t border-slate-800 backdrop-blur px-2 py-2 flex justify-around items-center max-w-lg mx-auto">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         return (
@@ -22,7 +22,7 @@ export default function BottomNav() {
             key={item.path}
             onClick={() => navigate(item.path)}
             className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
-              isActive ? 'text-blue-600' : 'text-gray-400'
+              isActive ? 'text-emerald-400' : 'text-slate-400'
             }`}
           >
             <item.icon className="w-5 h-5" />

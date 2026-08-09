@@ -13,7 +13,7 @@ const menuItems = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState('');
-  const [stats, setStats] = useState({ tong: 0, canFollowUp: 0 });
+  const [stats] = useState({ tong: 3, canFollowUp: 2 });
 
   useEffect(() => {
     // Lấy thông tin user
@@ -24,9 +24,6 @@ export default function Dashboard() {
         navigate('/');
       }
     });
-
-    // TODO: Lấy số liệu thật từ Supabase
-    setStats({ tong: 3, canFollowUp: 2 });
   }, [navigate]);
 
   const handleLogout = async () => {
