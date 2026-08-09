@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, MapPin, MoreVertical, X, ChevronDown, ChevronUp, Zap,Upload  } from 'lucide-react';
+import { Plus, Search, Phone, MapPin, MoreVertical, X, ChevronDown, ChevronUp, Zap, Upload, Sparkles } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
 import ImportModal from '../components/ImportModal';
+import QuickAddModal from '../components/QuickAddModal';
 
 const trangThaiConfig = {
   'tiem-nang': { label: 'Tiềm năng', color: 'bg-yellow-100 text-yellow-700' },
@@ -23,6 +24,7 @@ export default function KhachHang() {
   const [showImport, setShowImport] = useState(false);
   const [editingKhach, setEditingKhach] = useState(null);
   const [showDetails, setShowDetails] = useState(false); // ← Toggle chi tiết
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
 
   const [form, setForm] = useState({
     ten: '',
@@ -164,6 +166,13 @@ export default function KhachHang() {
           <h1 className="text-lg font-bold text-gray-800">Khách hàng</h1>
           <div className="flex gap-2">
             <button
+              onClick={() => setShowQuickAdd(true)}
+              className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-3 py-2.5 rounded-lg flex items-center gap-1.5 text-sm font-medium hover:from-emerald-600 hover:to-emerald-700 active:scale-95 transition-all"
+            >
+              <Sparkles className="w-4 h-4" />
+              Quick Add
+            </button>
+            <button
               onClick={() => setShowImport(true)}
               className="bg-white border border-gray-300 text-gray-700 px-3 py-2.5 rounded-lg flex items-center gap-1.5 text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all"
             >
@@ -175,7 +184,7 @@ export default function KhachHang() {
               className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all"
             >
               <Plus className="w-4 h-4" />
-              Thêm nhanh
+              Thêm mới
             </button>
           </div>
         </div>
@@ -348,8 +357,8 @@ export default function KhachHang() {
                       type="button"
                       onClick={() => setForm({ ...form, trangThai: key })}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.trangThai === key
-                          ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
-                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
+                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                     >
                       {value.label}
@@ -390,8 +399,8 @@ export default function KhachHang() {
                         type="button"
                         onClick={() => setForm({ ...form, nhuCau: form.nhuCau === option ? '' : option })}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nhuCau === option
-                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}
                       >
                         {option}
@@ -432,8 +441,8 @@ export default function KhachHang() {
                         type="button"
                         onClick={() => setForm({ ...form, nguon: form.nguon === option ? '' : option })}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nguon === option
-                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}
                       >
                         {option}
@@ -477,12 +486,22 @@ export default function KhachHang() {
 
       <BottomNav />
       {/* Import Modal */}
-{showImport && (
-  <ImportModal
-    onClose={() => setShowImport(false)}
-    onSuccess={() => fetchKhachHang()}
-  />
-)}
+      {showImport && (
+        <ImportModal
+          onClose={() => setShowImport(false)}
+          onSuccess={() => fetchKhachHang()}
+        />
+      )}
+      {/* Quick Add Modal */}
+      {showQuickAdd && (
+        <QuickAddModal
+          onClose={() => setShowQuickAdd(false)}
+          onSuccess={() => {
+            setShowQuickAdd(false);
+            fetchKhachHang();
+          }}
+        />
+      )}
     </div>
   );
 }
