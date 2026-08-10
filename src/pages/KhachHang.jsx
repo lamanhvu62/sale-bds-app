@@ -316,9 +316,10 @@ export default function KhachHang() {
 
       {/* ========== FORM THÊM NHANH (MODAL) ========== */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center animate-in fade-in">
-          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center">
+          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto overscroll-contain shadow-2xl">
 
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -333,47 +334,39 @@ export default function KhachHang() {
               </button>
             </div>
 
+            {/* === FIELD BẮT BUỘC === */}
             <div className="space-y-3 mb-2">
+              {/* Tên */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tên khách hàng <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={form.ten}
-                  onChange={(e) => setForm({ ...form, ten: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  placeholder="Nhập tên khách hàng"
-                  autoFocus
-                />
+                <input type="text" value={form.ten} onChange={(e) => setForm({ ...form, ten: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Nhập tên khách hàng" autoFocus />
               </div>
 
+              {/* SĐT */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Số điện thoại <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="tel"
-                  value={form.sdt}
-                  onChange={(e) => setForm({ ...form, sdt: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  placeholder="Nhập số điện thoại"
-                />
+                <input type="tel" value={form.sdt} onChange={(e) => setForm({ ...form, sdt: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Nhập số điện thoại" />
               </div>
 
+              {/* Trạng thái */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
                 <div className="flex gap-2 flex-wrap">
                   {Object.entries(trangThaiConfig).map(([key, value]) => (
-                    <button
-                      key={key}
-                      type="button"
+                    <button key={key} type="button"
                       onClick={() => setForm({ ...form, trangThai: key })}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.trangThai === key
                         ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        }`}
-                    >
+                        }`}>
                       {value.label}
                     </button>
                   ))}
@@ -381,111 +374,90 @@ export default function KhachHang() {
               </div>
             </div>
 
+            {/* Toggle chi tiết */}
             <button
               type="button"
               onClick={() => setShowDetails(!showDetails)}
               className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors mb-2"
             >
               {showDetails ? (
-                <>
-                  <ChevronUp className="w-4 h-4" />
-                  Ẩn chi tiết
-                </>
+                <><ChevronUp className="w-4 h-4" /> Ẩn chi tiết</>
               ) : (
-                <>
-                  <ChevronDown className="w-4 h-4" />
-                  Thêm chi tiết (nhu cầu, ngân sách...)
-                </>
+                <><ChevronDown className="w-4 h-4" /> Thêm chi tiết (nhu cầu, ngân sách...)</>
               )}
             </button>
 
+            {/* === FIELD CHI TIẾT === */}
             {showDetails && (
-              <div className="space-y-3 pt-2 border-t border-gray-100 animate-in slide-in-from-top-2">
+              <div className="space-y-3 pt-2 border-t border-gray-100">
+                {/* Nhu cầu */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nhu cầu</label>
                   <div className="flex flex-wrap gap-2">
                     {nhuCauOptions.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
+                      <button key={option} type="button"
                         onClick={() => setForm({ ...form, nhuCau: form.nhuCau === option ? '' : option })}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nhuCau === option
                           ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                          }`}
-                      >
+                          }`}>
                         {option}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Ngân sách + Khu vực */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Ngân sách</label>
-                    <input
-                      type="text"
-                      value={form.nganSach}
-                      onChange={(e) => setForm({ ...form, nganSach: e.target.value })}
+                    <input type="text" value={form.nganSach} onChange={(e) => setForm({ ...form, nganSach: e.target.value })}
                       className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                      placeholder="VD: 2-3 tỷ"
-                    />
+                      placeholder="VD: 2-3 tỷ" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực</label>
-                    <input
-                      type="text"
-                      value={form.khuVuc}
-                      onChange={(e) => setForm({ ...form, khuVuc: e.target.value })}
+                    <input type="text" value={form.khuVuc} onChange={(e) => setForm({ ...form, khuVuc: e.target.value })}
                       className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                      placeholder="VD: Quận 2, Thủ Đức"
-                    />
+                      placeholder="VD: Quận 2" />
                   </div>
                 </div>
 
+                {/* Nguồn */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nguồn khách</label>
                   <div className="flex flex-wrap gap-2">
                     {nguonOptions.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
+                      <button key={option} type="button"
                         onClick={() => setForm({ ...form, nguon: form.nguon === option ? '' : option })}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nguon === option
                           ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                          }`}
-                      >
+                          }`}>
                         {option}
                       </button>
                     ))}
                   </div>
                 </div>
 
+                {/* Ghi chú */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-                  <textarea
-                    value={form.ghiChu}
-                    onChange={(e) => setForm({ ...form, ghiChu: e.target.value })}
-                    rows={2}
+                  <textarea value={form.ghiChu} onChange={(e) => setForm({ ...form, ghiChu: e.target.value })} rows={2}
                     className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Ghi chú nhanh..."
-                  />
+                    placeholder="Ghi chú nhanh..." />
                 </div>
               </div>
             )}
 
+            {/* Nút Lưu */}
             <div className="flex gap-3 mt-5 pt-3 border-t border-gray-100">
-              <button
-                onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-              >
+              <button onClick={() => setShowForm(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
                 Hủy
               </button>
-              <button
-                onClick={handleSave}
-                className="flex-[2] px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
+              <button onClick={handleSave}
+                className="flex-[2] px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                 <Zap className="w-4 h-4" />
                 {editingKhach ? 'Cập nhật' : 'Lưu ngay'}
               </button>
