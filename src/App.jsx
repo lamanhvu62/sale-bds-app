@@ -7,6 +7,7 @@ import KhachHang from './pages/KhachHang';
 import DuAn from './pages/DuAn';
 import LichHen from './pages/LichHen';
 import Calculator from './pages/Calculator';
+import PushNotificationManager from './components/PushNotificationManager';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -47,6 +48,7 @@ function App() {
           <Route path="/calculator" element={user ? <Calculator /> : <Navigate to="/" />} />
         </Routes>
       </div>
+      {user && <PushNotificationManager />}
     </Router>
   );
 }

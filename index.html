@@ -1,13 +1,27 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sale-bds-app</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Ngăn Google Translate can thiệp -->
+  <meta name="google" content="notranslate" />
+  <meta name="googlebot" content="notranslate" />
+  <title>SaleBDS</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+  <!-- Tắt dịch tự động cho toàn bộ trang -->
+  <script>
+    // Vô hiệu hóa Google Translate toolbar nếu có
+    if (typeof google !== 'undefined' && google.translate) {
+      google.translate.TranslateElement({ pageLanguage: 'vi' });
+    }
+    // Ngăn chặn một số trình duyệt tự động dịch
+    document.documentElement.setAttribute('translate', 'no');
+  </script>
+</body>
+
 </html>
