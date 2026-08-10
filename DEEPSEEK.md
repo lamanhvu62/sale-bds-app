@@ -188,6 +188,7 @@ File `.env` (không commit):
 - [x] BottomNav cố định dưới cùng.
 - [x] Empty state với icon và hướng dẫn.
 - [x] Loading Skeleton cho Khách hàng, Dự án, Lịch hẹn.
+- [x] Quét thông tin khách hàng từ ảnh (OCR với Tesseract.js)
 
 ## 🚧 Đang làm / Kế hoạch gần (Giai đoạn 1 – UX/UI)
 Xem chi tiết trong `PROJECT_PLAN.md`. Ưu tiên:

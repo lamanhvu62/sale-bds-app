@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, Search, Phone, MapPin, MoreVertical, X, Upload, Sparkles, Zap, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Search, Phone, MapPin, MoreVertical, X, Upload, Sparkles, Zap, ChevronDown, ChevronUp, Camera, PhoneCall, MessageCircle } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
 import ImportModal from '../components/ImportModal';
@@ -7,6 +7,7 @@ import QuickAddModal from '../components/QuickAddModal';
 import { useToast } from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { KhachHangSkeleton } from '../components/Skeleton';
+import ImageOCRModal from '../components/ImageOCRModal';
 
 const trangThaiConfig = {
   'tiem-nang': { label: 'Tiềm năng', color: 'bg-yellow-100 text-yellow-700' },
@@ -28,6 +29,9 @@ export default function KhachHang() {
   const [showDetails, setShowDetails] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [showOCR, setShowOCR] = useState(false);
+  const addMenuRef = useRef(null);
+  const [showAddMenu, setShowAddMenu] = useState(false);
 
   const toast = useToast();
   const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
@@ -42,6 +46,16 @@ export default function KhachHang() {
     nguon: '',
     ghiChu: '',
   });
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(event.target)) {
+        setShowAddMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Load khách hàng
   useEffect(() => {
@@ -176,43 +190,82 @@ export default function KhachHang() {
     <div className="pb-20 max-w-lg mx-auto">
       {/* Header */}
       <div className="bg-white p-4 sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-lg font-bold text-gray-800">Khách hàng</h1>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowQuickAdd(true)}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-3 py-2.5 rounded-lg flex items-center gap-1.5 text-sm font-medium hover:from-emerald-600 hover:to-emerald-700 active:scale-95 transition-all"
-            >
-              <Sparkles className="w-4 h-4" />
-              Quick Add
-            </button>
-            <button
-              onClick={() => setShowImport(true)}
-              className="bg-white border border-gray-300 text-gray-700 px-3 py-2.5 rounded-lg flex items-center gap-1.5 text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all"
-            >
-              <Upload className="w-4 h-4" />
-              Import
-            </button>
-            <button
-              onClick={openAddForm}
-              className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              Thêm nhanh
-            </button>
-          </div>
-        </div>
+        {/* Header */}
+        <div className="bg-white p-4 sticky top-0 z-10 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-lg font-bold text-gray-800">Khách hàng</h1>
 
-        {/* Search */}
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Tìm theo tên hoặc SĐT..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
+            <div className="relative" ref={addMenuRef}>
+              {/* ===== Dropdown Thêm mới ===== */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowAddMenu(!showAddMenu)}
+                  className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  Thêm mới
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showAddMenu ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showAddMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border py-2 z-20 animate-in fade-in zoom-in-95 origin-top-right">
+                    <button
+                      onClick={() => { openAddForm(); setShowAddMenu(false); }}
+                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <Zap className="w-4 h-4 text-emerald-500" />
+                      <div>
+                        <p className="font-medium text-gray-700">Thêm nhanh</p>
+                        <p className="text-xs text-gray-400">Chỉ Tên + SĐT</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => { setShowQuickAdd(true); setShowAddMenu(false); }}
+                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <Sparkles className="w-4 h-4 text-purple-500" />
+                      <div>
+                        <p className="font-medium text-gray-700">Quick Add</p>
+                        <p className="text-xs text-gray-400">Parse từ đoạn text</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => { setShowImport(true); setShowAddMenu(false); }}
+                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <Upload className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <p className="font-medium text-gray-700">Import Excel</p>
+                        <p className="text-xs text-gray-400">Từ file .xlsx, .csv</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => { setShowOCR(true); setShowAddMenu(false); }}
+                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <Camera className="w-4 h-4 text-orange-500" />
+                      <div>
+                        <p className="font-medium text-gray-700">Quét ảnh</p>
+                        <p className="text-xs text-gray-400">Nhận dạng từ ảnh</p>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Tìm theo tên hoặc SĐT..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
         </div>
 
         {/* Filter */}
@@ -263,7 +316,23 @@ export default function KhachHang() {
                   <h3 className="font-semibold text-gray-800 truncate">{kh.ten}</h3>
                   <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
                     <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span>{kh.sdt}</span>
+                    <span className="mr-1">{kh.sdt}</span>
+                    <a
+                      href={`tel:${kh.sdt}`}
+                      className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-green-50 text-green-600 hover:bg-green-100 active:scale-90 transition-all"
+                      title="Gọi điện"
+                    >
+                      <PhoneCall className="w-3.5 h-3.5" />
+                    </a>
+                    <a
+                      href={`https://zalo.me/${kh.sdt}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 active:scale-90 transition-all"
+                      title="Chat Zalo"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                    </a>
                   </div>
                   {kh.khu_vuc && (
                     <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
@@ -315,21 +384,22 @@ export default function KhachHang() {
       </div>
 
       {/* ========== FORM THÊM NHANH (MODAL) ========== */}
+      {/* ========== FORM THÊM NHANH (MODAL) ========== */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center">
-          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto overscroll-contain shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center overflow-hidden">
+          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto overflow-x-hidden shadow-2xl box-border">
 
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <Zap className="w-4 h-4 text-emerald-600" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-800">
+                <h2 className="text-lg font-bold text-gray-800 truncate">
                   {editingKhach ? 'Sửa khách hàng' : 'Thêm khách hàng nhanh'}
                 </h2>
               </div>
-              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-100 rounded-full">
+              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0">
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
@@ -342,7 +412,7 @@ export default function KhachHang() {
                   Tên khách hàng <span className="text-red-500">*</span>
                 </label>
                 <input type="text" value={form.ten} onChange={(e) => setForm({ ...form, ten: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border"
                   placeholder="Nhập tên khách hàng" autoFocus />
               </div>
 
@@ -352,7 +422,7 @@ export default function KhachHang() {
                   Số điện thoại <span className="text-red-500">*</span>
                 </label>
                 <input type="tel" value={form.sdt} onChange={(e) => setForm({ ...form, sdt: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border"
                   placeholder="Nhập số điện thoại" />
               </div>
 
@@ -363,7 +433,7 @@ export default function KhachHang() {
                   {Object.entries(trangThaiConfig).map(([key, value]) => (
                     <button key={key} type="button"
                       onClick={() => setForm({ ...form, trangThai: key })}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.trangThai === key
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${form.trangThai === key
                         ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}>
@@ -381,9 +451,9 @@ export default function KhachHang() {
               className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors mb-2"
             >
               {showDetails ? (
-                <><ChevronUp className="w-4 h-4" /> Ẩn chi tiết</>
+                <><ChevronUp className="w-4 h-4 flex-shrink-0" /> Ẩn chi tiết</>
               ) : (
-                <><ChevronDown className="w-4 h-4" /> Thêm chi tiết (nhu cầu, ngân sách...)</>
+                <><ChevronDown className="w-4 h-4 flex-shrink-0" /> Thêm chi tiết (nhu cầu, ngân sách...)</>
               )}
             </button>
 
@@ -397,7 +467,7 @@ export default function KhachHang() {
                     {nhuCauOptions.map((option) => (
                       <button key={option} type="button"
                         onClick={() => setForm({ ...form, nhuCau: form.nhuCau === option ? '' : option })}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nhuCau === option
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${form.nhuCau === option
                           ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}>
@@ -409,16 +479,16 @@ export default function KhachHang() {
 
                 {/* Ngân sách + Khu vực */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Ngân sách</label>
                     <input type="text" value={form.nganSach} onChange={(e) => setForm({ ...form, nganSach: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border"
                       placeholder="VD: 2-3 tỷ" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực</label>
                     <input type="text" value={form.khuVuc} onChange={(e) => setForm({ ...form, khuVuc: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border"
                       placeholder="VD: Quận 2" />
                   </div>
                 </div>
@@ -430,7 +500,7 @@ export default function KhachHang() {
                     {nguonOptions.map((option) => (
                       <button key={option} type="button"
                         onClick={() => setForm({ ...form, nguon: form.nguon === option ? '' : option })}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nguon === option
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${form.nguon === option
                           ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}>
@@ -444,7 +514,7 @@ export default function KhachHang() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
                   <textarea value={form.ghiChu} onChange={(e) => setForm({ ...form, ghiChu: e.target.value })} rows={2}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border resize-none"
                     placeholder="Ghi chú nhanh..." />
                 </div>
               </div>
@@ -453,12 +523,12 @@ export default function KhachHang() {
             {/* Nút Lưu */}
             <div className="flex gap-3 mt-5 pt-3 border-t border-gray-100">
               <button onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 min-w-0">
                 Hủy
               </button>
               <button onClick={handleSave}
-                className="flex-[2] px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                <Zap className="w-4 h-4" />
+                className="flex-[2] px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-w-0">
+                <Zap className="w-4 h-4 flex-shrink-0" />
                 {editingKhach ? 'Cập nhật' : 'Lưu ngay'}
               </button>
             </div>
@@ -493,6 +563,13 @@ export default function KhachHang() {
         message={confirmState.message}
         type="danger"
       />
+      {/* Image OCR Modal */}
+      {showOCR && (
+        <ImageOCRModal
+          onClose={() => setShowOCR(false)}
+          onSuccess={() => { setShowOCR(false); fetchKhachHang(); }}
+        />
+      )}
 
       <BottomNav />
     </div>
