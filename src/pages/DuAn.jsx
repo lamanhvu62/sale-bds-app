@@ -4,6 +4,7 @@ import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
 import { useToast } from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { DuAnSkeleton } from '../components/Skeleton';
 
 const loaiHinhOptions = ['Chung cư', 'Nhà phố', 'Biệt thự', 'Đất nền', 'Shophouse', 'Condotel'];
 const tienDoOptions = [
@@ -224,9 +225,10 @@ export default function DuAn() {
 
       <div className="p-4 space-y-3">
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-gray-400 mt-3">Đang tải...</p>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <DuAnSkeleton key={i} />
+            ))}
           </div>
         ) : filteredList.length === 0 ? (
           <div className="text-center py-12">

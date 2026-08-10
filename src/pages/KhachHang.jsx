@@ -6,6 +6,7 @@ import ImportModal from '../components/ImportModal';
 import QuickAddModal from '../components/QuickAddModal';
 import { useToast } from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { KhachHangSkeleton } from '../components/Skeleton';
 
 const trangThaiConfig = {
   'tiem-nang': { label: 'Tiềm năng', color: 'bg-yellow-100 text-yellow-700' },
@@ -239,9 +240,10 @@ export default function KhachHang() {
       {/* Danh sách khách hàng */}
       <div className="p-4 space-y-3">
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-gray-400 mt-3">Đang tải...</p>
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <KhachHangSkeleton key={i} />
+            ))}
           </div>
         ) : filteredList.length === 0 ? (
           <div className="text-center py-12">
@@ -368,8 +370,8 @@ export default function KhachHang() {
                       type="button"
                       onClick={() => setForm({ ...form, trangThai: key })}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.trangThai === key
-                          ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
-                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
+                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                     >
                       {value.label}
@@ -408,8 +410,8 @@ export default function KhachHang() {
                         type="button"
                         onClick={() => setForm({ ...form, nhuCau: form.nhuCau === option ? '' : option })}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nhuCau === option
-                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}
                       >
                         {option}
@@ -450,8 +452,8 @@ export default function KhachHang() {
                         type="button"
                         onClick={() => setForm({ ...form, nguon: form.nguon === option ? '' : option })}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.nguon === option
-                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}
                       >
                         {option}

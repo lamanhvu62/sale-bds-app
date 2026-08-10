@@ -187,6 +187,7 @@ File `.env` (không commit):
 - [x] ConfirmDialog thay thế window.confirm.
 - [x] BottomNav cố định dưới cùng.
 - [x] Empty state với icon và hướng dẫn.
+- [x] Loading Skeleton cho Khách hàng, Dự án, Lịch hẹn.
 
 ## 🚧 Đang làm / Kế hoạch gần (Giai đoạn 1 – UX/UI)
 Xem chi tiết trong `PROJECT_PLAN.md`. Ưu tiên:

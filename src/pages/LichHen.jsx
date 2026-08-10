@@ -7,6 +7,7 @@ import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
 import { useToast } from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { LichHenSkeleton, CalendarSkeleton } from '../components/Skeleton';
 
 // Helper: format ngày giờ
 const formatDate = (date) => {
@@ -347,13 +348,12 @@ export default function LichHen() {
                   <button
                     key={`${wi}-${di}`}
                     onClick={() => setSelectedDate(day)}
-                    className={`h-10 flex flex-col items-center justify-center rounded-lg transition-colors relative ${
-                      isSelected
-                        ? 'bg-emerald-600 text-white'
-                        : isToday
+                    className={`h-10 flex flex-col items-center justify-center rounded-lg transition-colors relative ${isSelected
+                      ? 'bg-emerald-600 text-white'
+                      : isToday
                         ? 'bg-emerald-100 text-emerald-700'
                         : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     <span className="text-sm font-medium">{day.getDate()}</span>
                     {hasAppointments && (
@@ -377,9 +377,7 @@ export default function LichHen() {
         </div>
 
         {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full mx-auto"></div>
-          </div>
+          <CalendarSkeleton />
         ) : dayAppointments.length === 0 ? (
           <div className="text-center py-8 bg-white rounded-xl">
             <Calendar className="w-10 h-10 text-gray-300 mx-auto mb-2" />
@@ -390,9 +388,8 @@ export default function LichHen() {
             {dayAppointments.map((appt) => (
               <div
                 key={appt.id}
-                className={`bg-white rounded-xl p-4 shadow-sm border-l-4 ${
-                  appt.da_hoan_thanh ? 'border-gray-300 opacity-70' : 'border-emerald-500'
-                }`}
+                className={`bg-white rounded-xl p-4 shadow-sm border-l-4 ${appt.da_hoan_thanh ? 'border-gray-300 opacity-70' : 'border-emerald-500'
+                  }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -438,11 +435,10 @@ export default function LichHen() {
                   <div className="flex items-center gap-1 ml-2">
                     <button
                       onClick={() => toggleComplete(appt)}
-                      className={`p-1.5 rounded-full ${
-                        appt.da_hoan_thanh
-                          ? 'bg-emerald-100 text-emerald-600'
-                          : 'bg-gray-100 text-gray-400 hover:text-emerald-600'
-                      }`}
+                      className={`p-1.5 rounded-full ${appt.da_hoan_thanh
+                        ? 'bg-emerald-100 text-emerald-600'
+                        : 'bg-gray-100 text-gray-400 hover:text-emerald-600'
+                        }`}
                       title={appt.da_hoan_thanh ? 'Đánh dấu chưa xong' : 'Đánh dấu đã xong'}
                     >
                       <Check className="w-4 h-4" />
