@@ -1,39 +1,26 @@
 const CACHE_NAME = 'salebds-v1';
 
-// Cài đặt và cache tài nguyên tĩnh (chỉ GET)
 self.addEventListener('install', event => {
+    self.skipWaiting(); // Tự động kích hoạt bản mới
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
             return cache.addAll([
                 '/',
-                '/index.html',
-                // Thêm các file tĩnh khác nếu cần
+                '/index.html'
             ]);
         })
     );
 });
 
-// Xử lý fetch: chỉ cache GET requests
 self.addEventListener('fetch', event => {
-    // Bỏ qua non-GET requests
-    if (event.request.method !== 'GET') {
-        event.respondWith(fetch(event.request));
-        return;
-    }
-
+    if (event.request.method !== 'GET') return;
     event.respondWith(
         caches.match(event.request).then(cachedResponse => {
-            // Trả về từ cache nếu có, nếu không thì fetch từ mạng
-            return cachedResponse || fetch(event.request).then(response => {
-                // Có thể cache lại response nếu muốn (dynamic caching)
-                // Nhưng hiện tại chỉ trả về, không cache thêm
-                return response;
-            });
+            return cachedResponse || fetch(event.request);
         })
     );
 });
 
-// Xóa cache cũ khi kích hoạt
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(keys => {
@@ -41,5 +28,31 @@ self.addEventListener('activate', event => {
                 keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
             );
         })
+    );
+});
+
+// ===== THÊM PHẦN PUSH =====
+self.addEventListener('push', event => {
+    const data = event.data?.json() || {};
+    const options = {
+        body: data.body || 'Bạn có lịch hẹn sắp đến',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        data: {
+            url: data.url || '/lich-hen'
+        },
+        vibrate: [200, 100, 200],
+        tag: 'appointment-reminder'
+    };
+    event.waitUntil(
+        self.registration.showNotification(data.title || 'SaleBDS', options)
+    );
+});
+
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    const url = event.notification.data?.url || '/lich-hen';
+    event.waitUntil(
+        clients.openWindow(url)
     );
 });

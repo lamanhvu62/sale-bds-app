@@ -7,7 +7,9 @@ import KhachHang from './pages/KhachHang';
 import DuAn from './pages/DuAn';
 import LichHen from './pages/LichHen';
 import Calculator from './pages/Calculator';
-import PushNotificationManager from './components/PushNotificationManager';
+import PushSubscribe from './components/PushSubscribe';
+
+// Ở phần render, sau khi user đã đăng nhập:
 
 function App() {
   const [user, setUser] = useState(null);
@@ -48,7 +50,7 @@ function App() {
           <Route path="/calculator" element={user ? <Calculator /> : <Navigate to="/" />} />
         </Routes>
       </div>
-      {user && <PushNotificationManager />}
+      {user && <PushSubscribe />}
     </Router>
   );
 }
