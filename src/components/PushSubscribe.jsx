@@ -73,6 +73,8 @@ export default function PushSubscribe() {
         return outputArray;
     }
 
+    console.log('VAPID public key:', import.meta.env.VITE_VAPID_PUBLIC_KEY);
+
     // Hiển thị nút nếu chưa đăng ký
     if (subscribed) return null;
 
