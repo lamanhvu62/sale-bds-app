@@ -8,12 +8,14 @@ import { useToast } from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { KhachHangSkeleton } from '../components/Skeleton';
 import ImageOCRModal from '../components/ImageOCRModal';
+import MessageTemplateModal from '../components/MessageTemplateModal';
 
 const trangThaiConfig = {
   'tiem-nang': { label: 'Tiềm năng', color: 'bg-yellow-100 text-yellow-700' },
   'dang-cham': { label: 'Đang chăm', color: 'bg-blue-100 text-blue-700' },
   'sap-chot': { label: 'Sắp chốt', color: 'bg-green-100 text-green-700' },
   'da-mua': { label: 'Đã mua', color: 'bg-gray-100 text-gray-700' },
+  'khong-nhu-cau': { label: 'Không nhu cầu', color: 'bg-red-100 text-red-700' }, // ← Thêm dòng này
 };
 
 const nguonOptions = ['Facebook', 'Zalo', 'Website', 'Người quen giới thiệu', 'Gọi tới', 'Khác'];
@@ -32,6 +34,8 @@ export default function KhachHang() {
   const [showOCR, setShowOCR] = useState(false);
   const addMenuRef = useRef(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showMessageModal, setShowMessageModal] = useState(false);
 
   const toast = useToast();
   const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
@@ -61,6 +65,11 @@ export default function KhachHang() {
   useEffect(() => {
     fetchKhachHang();
   }, []);
+
+  const openTemplateModal = (khach) => {
+    setSelectedCustomer(khach);
+    setShowTemplateModal(true);
+  };
 
   const fetchKhachHang = async () => {
     setLoading(true);
@@ -363,6 +372,12 @@ export default function KhachHang() {
                       >
                         🗑️ Xóa
                       </button>
+                      <button
+                        onClick={() => { setSelectedCustomer(kh); setShowMessageModal(true); }}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                      >
+                        💬 Nhắn tin
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -383,7 +398,6 @@ export default function KhachHang() {
         )}
       </div>
 
-      {/* ========== FORM THÊM NHANH (MODAL) ========== */}
       {/* ========== FORM THÊM NHANH (MODAL) ========== */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center overflow-hidden">
@@ -568,6 +582,13 @@ export default function KhachHang() {
         <ImageOCRModal
           onClose={() => setShowOCR(false)}
           onSuccess={() => { setShowOCR(false); fetchKhachHang(); }}
+        />
+      )}
+
+      {showMessageModal && (
+        <MessageTemplateModal
+          onClose={() => setShowMessageModal(false)}
+          customer={selectedCustomer}
         />
       )}
 

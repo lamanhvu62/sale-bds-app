@@ -90,7 +90,7 @@ File `.env` (không commit):
 | ngan_sach | TEXT | |
 | khu_vuc | TEXT | |
 | nguon | TEXT | |
-| trang_thai | TEXT | 'tiem-nang', 'dang-cham', 'sap-chot', 'da-mua' |
+| trang_thai | TEXT | 'tiem-nang', 'dang-cham', 'sap-chot', 'da-mua', 'khong-nhu-cau' |
 | ghi_chu | TEXT | |
 | created_at | TIMESTAMPTZ | DEFAULT NOW() |
 | updated_at | TIMESTAMPTZ | DEFAULT NOW() |

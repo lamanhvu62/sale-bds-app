@@ -10,6 +10,7 @@ const trangThaiConfig = {
     'dang-cham': { label: 'Đang chăm', color: 'bg-blue-100 text-blue-700' },
     'sap-chot': { label: 'Sắp chốt', color: 'bg-green-100 text-green-700' },
     'da-mua': { label: 'Đã mua', color: 'bg-gray-100 text-gray-700' },
+    'khong-nhu-cau': { label: 'Không nhu cầu', color: 'bg-red-100 text-red-700' },
 };
 
 export default function ImageOCRModal({ onClose, onSuccess }) {
@@ -316,8 +317,8 @@ export default function ImageOCRModal({ onClose, onSuccess }) {
                                                 <button key={key} type="button"
                                                     onClick={() => updateCustomer(index, 'trangThai', key)}
                                                     className={`px-2 py-1 rounded-full text-xs font-medium transition-all ${customer.trangThai === key
-                                                            ? 'ring-2 ring-purple-500 ring-offset-1 ' + value.color
-                                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                                        ? 'ring-2 ring-purple-500 ring-offset-1 ' + value.color
+                                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                                         }`}>
                                                     {value.label}
                                                 </button>

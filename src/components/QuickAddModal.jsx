@@ -7,6 +7,7 @@ const trangThaiConfig = {
   'dang-cham': { label: 'Đang chăm', color: 'bg-blue-100 text-blue-700' },
   'sap-chot': { label: 'Sắp chốt', color: 'bg-green-100 text-green-700' },
   'da-mua': { label: 'Đã mua', color: 'bg-gray-100 text-gray-700' },
+  'khong-nhu-cau': { label: 'Không nhu cầu', color: 'bg-red-100 text-red-700' },
 };
 
 // Hàm parse text thông minh
@@ -160,7 +161,7 @@ function parseText(input) {
   if (result.sdt) remaining = remaining.replace(result.sdt, '');
   remaining = remaining.replace(/tên|sđt|sdt|số điện thoại|điện thoại|nhu cầu|ngân sách|khu vực|nguồn/gi, '');
   remaining = remaining.replace(/[:\s]+/g, ' ').trim();
-  
+
   if (remaining.length > 5) {
     result.ghiChu = remaining;
   }
@@ -229,7 +230,7 @@ export default function QuickAddModal({ onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center">
       <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -381,11 +382,10 @@ export default function QuickAddModal({ onClose, onSuccess }) {
                     <button
                       key={key}
                       onClick={() => setParsed({ ...parsed, trangThai: key })}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        parsed.trangThai === key
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${parsed.trangThai === key
                           ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {value.label}
                     </button>

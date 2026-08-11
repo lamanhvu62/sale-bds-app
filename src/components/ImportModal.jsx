@@ -5,54 +5,54 @@ import { supabase } from '../services/supabase';
 
 // Map tên cột tiếng Việt → field trong database
 const FIELD_MAP = {
-'tên': 'ten',
-'ten': 'ten',
-'họ tên': 'ten',
-'ho ten': 'ten',
-'họ và tên': 'ten',
-'ho va ten': 'ten',
-'name': 'ten',
-'khách hàng': 'ten',
-'khach hang': 'ten',
+  'tên': 'ten',
+  'ten': 'ten',
+  'họ tên': 'ten',
+  'ho ten': 'ten',
+  'họ và tên': 'ten',
+  'ho va ten': 'ten',
+  'name': 'ten',
+  'khách hàng': 'ten',
+  'khach hang': 'ten',
 
-'sđt': 'sdt',
-'sdt': 'sdt',
-'số điện thoại': 'sdt',
-'so dien thoai': 'sdt',
-'điện thoại': 'sdt',
-'dien thoai': 'sdt',
-'phone': 'sdt',
-'mobile': 'sdt',
-'tel': 'sdt',
+  'sđt': 'sdt',
+  'sdt': 'sdt',
+  'số điện thoại': 'sdt',
+  'so dien thoai': 'sdt',
+  'điện thoại': 'sdt',
+  'dien thoai': 'sdt',
+  'phone': 'sdt',
+  'mobile': 'sdt',
+  'tel': 'sdt',
 
-'nhu cầu': 'nhu_cau',
-'nhu cau': 'nhu_cau',
-'need': 'nhu_cau',
+  'nhu cầu': 'nhu_cau',
+  'nhu cau': 'nhu_cau',
+  'need': 'nhu_cau',
 
-'ngân sách': 'ngan_sach',
-'ngan sach': 'ngan_sach',
-'budget': 'ngan_sach',
-'khoảng giá': 'ngan_sach',
-'khoang gia': 'ngan_sach',
+  'ngân sách': 'ngan_sach',
+  'ngan sach': 'ngan_sach',
+  'budget': 'ngan_sach',
+  'khoảng giá': 'ngan_sach',
+  'khoang gia': 'ngan_sach',
 
-'khu vực': 'khu_vuc',
-'khu vuc': 'khu_vuc',
-'area': 'khu_vuc',
-'địa bàn': 'khu_vuc',
-'dia ban': 'khu_vuc',
+  'khu vực': 'khu_vuc',
+  'khu vuc': 'khu_vuc',
+  'area': 'khu_vuc',
+  'địa bàn': 'khu_vuc',
+  'dia ban': 'khu_vuc',
 
-'nguồn': 'nguon',
-'nguon': 'nguon',
-'source': 'nguon',
-'kênh': 'nguon',
-'kenh': 'nguon',
+  'nguồn': 'nguon',
+  'nguon': 'nguon',
+  'source': 'nguon',
+  'kênh': 'nguon',
+  'kenh': 'nguon',
 
-'ghi chú': 'ghi_chu',
-'ghi chu': 'ghi_chu',
-'note': 'ghi_chu',
-'notes': 'ghi_chu',
-'chú thích': 'ghi_chu',
-'chu thich': 'ghi_chu',
+  'ghi chú': 'ghi_chu',
+  'ghi chu': 'ghi_chu',
+  'note': 'ghi_chu',
+  'notes': 'ghi_chu',
+  'chú thích': 'ghi_chu',
+  'chu thich': 'ghi_chu',
 };
 
 const TRANG_THAI_MAP = {
@@ -64,6 +64,8 @@ const TRANG_THAI_MAP = {
   'sap chot': 'sap-chot',
   'đã mua': 'da-mua',
   'da mua': 'da-mua',
+  'không nhu cầu': 'khong-nhu-cau',
+  'khong nhu cau': 'khong-nhu-cau',
 };
 
 export default function ImportModal({ onClose, onSuccess }) {
@@ -97,7 +99,7 @@ export default function ImportModal({ onClose, onSuccess }) {
   // Xử lý khi chọn file
   const handleFileSelect = async (selectedFile) => {
     if (!selectedFile) return;
-    
+
     // Kiểm tra định dạng
     const validTypes = ['.csv', '.xlsx', '.xls'];
     const ext = '.' + selectedFile.name.split('.').pop().toLowerCase();
@@ -113,7 +115,7 @@ export default function ImportModal({ onClose, onSuccess }) {
       const workbook = XLSX.read(data, { type: 'array' });
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-      
+
       if (jsonData.length < 2) {
         alert('File không có dữ liệu hoặc chỉ có 1 dòng!');
         return;
@@ -238,7 +240,7 @@ export default function ImportModal({ onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-20 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b sticky top-0 bg-white z-10">
           <div className="flex items-center gap-2">
@@ -255,11 +257,10 @@ export default function ImportModal({ onClose, onSuccess }) {
           <div className="flex items-center gap-2 mb-5">
             {[1, 2, 3, 4].map((s) => (
               <div key={s} className="flex items-center gap-2 flex-1">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step > s ? 'bg-emerald-500 text-white' :
-                  step === s ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' :
-                  'bg-gray-200 text-gray-500'
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step > s ? 'bg-emerald-500 text-white' :
+                    step === s ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' :
+                      'bg-gray-200 text-gray-500'
+                  }`}>
                   {step > s ? <Check className="w-4 h-4" /> : s}
                 </div>
                 {s < 4 && <div className={`flex-1 h-1 rounded ${step > s ? 'bg-emerald-500' : 'bg-gray-200'}`} />}
@@ -273,9 +274,8 @@ export default function ImportModal({ onClose, onSuccess }) {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-                dragOver ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 hover:border-emerald-400'
-              }`}
+              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${dragOver ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 hover:border-emerald-400'
+                }`}
               onClick={() => document.getElementById('file-input').click()}
             >
               <input
@@ -315,7 +315,7 @@ export default function ImportModal({ onClose, onSuccess }) {
                 {availableFields.map(field => {
                   const mappedCol = Object.keys(columnMapping).find(col => columnMapping[col] === field.key) || '';
                   const isMapped = !!mappedCol;
-                  
+
                   return (
                     <div key={field.key} className={`flex items-center gap-3 p-2 rounded-lg ${field.required && !isMapped ? 'bg-red-50' : isMapped ? 'bg-emerald-50' : ''}`}>
                       <div className="w-32 flex-shrink-0">
@@ -339,15 +339,14 @@ export default function ImportModal({ onClose, onSuccess }) {
                           }
                           setColumnMapping(newMapping);
                         }}
-                        className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                          field.required && !isMapped ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                        }`}
+                        className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 ${field.required && !isMapped ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                          }`}
                       >
                         <option value="">-- Chọn cột --</option>
                         {columns.filter(c => c).map(col => {
                           const otherField = columnMapping[col];
-                          const otherLabel = otherField && otherField !== field.key 
-                            ? availableFields.find(af => af.key === otherField)?.label 
+                          const otherLabel = otherField && otherField !== field.key
+                            ? availableFields.find(af => af.key === otherField)?.label
                             : null;
                           return (
                             <option key={col} value={col}>
@@ -406,11 +405,10 @@ export default function ImportModal({ onClose, onSuccess }) {
                     setStep(3);
                   }}
                   disabled={!hasRequiredFields()}
-                  className={`flex-[2] px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    hasRequiredFields()
+                  className={`flex-[2] px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${hasRequiredFields()
                       ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {hasRequiredFields()
                     ? `👀 Xem preview (${allData.length} dòng)`
@@ -426,7 +424,7 @@ export default function ImportModal({ onClose, onSuccess }) {
               <p className="text-sm text-gray-600 mb-3">
                 Preview 5 dòng đầu tiên. Tổng cộng <strong>{allData.length}</strong> dòng sẽ được import.
               </p>
-              
+
               <div className="overflow-x-auto mb-4 border rounded-lg">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50">
@@ -444,7 +442,7 @@ export default function ImportModal({ onClose, onSuccess }) {
                       const sdtCol = Object.keys(columnMapping).find(col => columnMapping[col] === 'sdt');
                       const nhuCauCol = Object.keys(columnMapping).find(col => columnMapping[col] === 'nhu_cau');
                       const nganSachCol = Object.keys(columnMapping).find(col => columnMapping[col] === 'ngan_sach');
-                      
+
                       return (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-3 py-2 text-gray-400">{index + 1}</td>
@@ -503,7 +501,7 @@ export default function ImportModal({ onClose, onSuccess }) {
                       </div>
                     )}
                   </div>
-                  
+
                   {importResult.errors.length > 0 && (
                     <details className="text-left mb-4">
                       <summary className="text-sm text-red-600 cursor-pointer hover:underline">
