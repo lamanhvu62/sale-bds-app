@@ -12,59 +12,90 @@ export default function PushSubscribe() {
 
     const checkSubscription = async () => {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-        const reg = await navigator.serviceWorker.getRegistration();
-        if (!reg) return;
-        const sub = await reg.pushManager.getSubscription();
-        setSubscribed(!!sub);
+        try {
+            const reg = await navigator.serviceWorker.getRegistration();
+            if (!reg) return;
+            const sub = await reg.pushManager.getSubscription();
+            setSubscribed(!!sub);
+        } catch (err) {
+            console.log('Kiểm tra subscription:', err);
+        }
     };
 
     const subscribe = async () => {
         try {
+            // 1. Xin quyền
             const permission = await Notification.requestPermission();
             if (permission !== 'granted') {
                 toast.warning('Bạn đã từ chối nhận thông báo');
                 return;
             }
-            const reg = await navigator.serviceWorker.getRegistration();
+
+            // 2. Đợi Service Worker sẵn sàng
+            const reg = await navigator.serviceWorker.ready;
             if (!reg) {
-                toast.error('Không tìm thấy Service Worker');
+                toast.error('Service Worker chưa sẵn sàng, thử lại sau');
                 return;
             }
-            const vapidPublicKey = import.meta.env.VAPID_PUBLIC_KEY;
+
+            // 3. Lấy public key từ biến môi trường
+            const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+            console.log('🔑 VAPID public key:', vapidPublicKey); // Log kiểm tra
+
             if (!vapidPublicKey) {
-                toast.error('Thiếu VAPID public key');
+                toast.error('Thiếu VAPID public key (kiểm tra file .env)');
                 return;
             }
+
+            // 4. Chuyển đổi key (dễ lỗi nếu key sai định dạng)
+            let convertedKey;
+            try {
+                convertedKey = urlBase64ToUint8Array(vapidPublicKey);
+            } catch (e) {
+                console.error('Lỗi chuyển đổi VAPID key:', e);
+                toast.error('VAPID key không đúng định dạng');
+                return;
+            }
+
+            // 5. Tạo subscription
             const subscription = await reg.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+                applicationServerKey: convertedKey,
             });
-            // Lưu lên Supabase
+
+            console.log('📨 Subscription:', subscription);
+
+            // 6. Lưu vào Supabase
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 toast.error('Bạn chưa đăng nhập');
                 return;
             }
+
             const { error } = await supabase
                 .from('push_subscriptions')
                 .upsert({ user_id: user.id, subscription: subscription }, { onConflict: 'user_id' });
+
             if (error) {
                 console.error('Lỗi lưu subscription:', error);
-                toast.error('Lỗi lưu đăng ký thông báo');
+                toast.error('Lỗi lưu đăng ký: ' + error.message);
             } else {
                 toast.success('Đã bật thông báo nhắc lịch hẹn!');
                 setSubscribed(true);
             }
         } catch (err) {
-            console.error(err);
-            toast.error('Có lỗi xảy ra');
+            console.error('❌ Lỗi subscribe:', err);
+            toast.error('Có lỗi: ' + (err.message || 'Không xác định'));
         }
     };
 
-    // Helper chuyển Base64 sang Uint8Array
+    // Helper chuyển đổi Base64 URL-safe thành Uint8Array
     function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        // Thêm padding nếu thiếu
+        const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
         const rawData = window.atob(base64);
         const outputArray = new Uint8Array(rawData.length);
         for (let i = 0; i < rawData.length; ++i) {
@@ -73,10 +104,7 @@ export default function PushSubscribe() {
         return outputArray;
     }
 
-    console.log('VAPID public key:', import.meta.env.VITE_VAPID_PUBLIC_KEY);
-
-    // Hiển thị nút nếu chưa đăng ký
-    if (subscribed) return null;
+    if (subscribed) return null; // Đã đăng ký thì không hiện nút nữa
 
     return (
         <button

@@ -1,13 +1,10 @@
-const CACHE_NAME = 'salebds-v1';
+const CACHE_NAME = 'salebds-v1.0.1';
 
 self.addEventListener('install', event => {
-    self.skipWaiting(); // Tự động kích hoạt bản mới
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll([
-                '/',
-                '/index.html'
-            ]);
+            return cache.addAll(['/', '/index.html']);
         })
     );
 });
@@ -31,9 +28,20 @@ self.addEventListener('activate', event => {
     );
 });
 
-// ===== THÊM PHẦN PUSH =====
 self.addEventListener('push', event => {
-    const data = event.data?.json() || {};
+    let data = {};
+    try {
+        // Thử parse JSON từ server
+        data = event.data?.json();
+    } catch (e) {
+        // Nếu không phải JSON (test push từ DevTools), dùng text làm nội dung
+        data = {
+            title: 'SaleBDS',
+            body: event.data?.text() || 'Bạn có thông báo mới',
+            url: '/'
+        };
+    }
+
     const options = {
         body: data.body || 'Bạn có lịch hẹn sắp đến',
         icon: '/icon-192.png',
@@ -44,6 +52,7 @@ self.addEventListener('push', event => {
         vibrate: [200, 100, 200],
         tag: 'appointment-reminder'
     };
+
     event.waitUntil(
         self.registration.showNotification(data.title || 'SaleBDS', options)
     );
@@ -52,7 +61,5 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
     event.notification.close();
     const url = event.notification.data?.url || '/lich-hen';
-    event.waitUntil(
-        clients.openWindow(url)
-    );
+    event.waitUntil(clients.openWindow(url));
 });
