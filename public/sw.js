@@ -1,25 +1,39 @@
-self.addEventListener('push', (event) => {
-    const data = event.data?.json() || {};
-    const options = {
-        body: data.body || 'Bạn có lịch hẹn sắp đến',
-        icon: '/icon-192.png', // bạn cần có ảnh icon trong public
-        badge: '/badge-72.png',
-        data: {
-            url: data.url || '/lich-hen'
-        },
-        vibrate: [200, 100, 200],
-        tag: data.tag || 'appointment-reminder'
-    };
+// Tên cache
+const CACHE_NAME = 'salebds-v1';
 
+// Sự kiện install: cache các tài nguyên tĩnh
+self.addEventListener('install', event => {
     event.waitUntil(
-        self.registration.showNotification(data.title || 'SaleBDS', options)
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.addAll([
+                '/',
+                '/index.html',
+                '/dashboard',
+                '/khach-hang',
+                '/du-an',
+                '/lich-hen',
+                '/calculator',
+            ]);
+        })
     );
 });
 
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    const url = event.notification.data?.url || '/lich-hen';
+// Sự kiện fetch: ưu tiên lấy từ cache (offline), nếu không có thì lấy từ mạng
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request).then(cachedResponse => {
+            return cachedResponse || fetch(event.request);
+        })
+    );
+});
+
+// Sự kiện activate: dọn dẹp cache cũ
+self.addEventListener('activate', event => {
     event.waitUntil(
-        clients.openWindow(url)
+        caches.keys().then(keys => {
+            return Promise.all(
+                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+            );
+        })
     );
 });
