@@ -1,41 +1,44 @@
 const CACHE_NAME = 'salebds-v1';
-const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/icon-192.png',
-    '/icon-512.png',
-];
 
-// Cài đặt SW và cache tài nguyên
-self.addEventListener('install', (event) => {
+// Cài đặt và cache tài nguyên tĩnh (chỉ GET)
+self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS_TO_CACHE);
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.addAll([
+                '/',
+                '/index.html',
+                // Thêm các file tĩnh khác nếu cần
+            ]);
         })
     );
 });
 
-// Lấy tài nguyên từ cache hoặc mạng
-self.addEventListener('fetch', (event) => {
+// Xử lý fetch: chỉ cache GET requests
+self.addEventListener('fetch', event => {
+    // Bỏ qua non-GET requests
+    if (event.request.method !== 'GET') {
+        event.respondWith(fetch(event.request));
+        return;
+    }
+
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            return cachedResponse || fetch(event.request).then((response) => {
-                return caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, response.clone());
-                    return response;
-                });
+        caches.match(event.request).then(cachedResponse => {
+            // Trả về từ cache nếu có, nếu không thì fetch từ mạng
+            return cachedResponse || fetch(event.request).then(response => {
+                // Có thể cache lại response nếu muốn (dynamic caching)
+                // Nhưng hiện tại chỉ trả về, không cache thêm
+                return response;
             });
         })
     );
 });
 
-// Dọn dẹp cache cũ khi kích hoạt
-self.addEventListener('activate', (event) => {
+// Xóa cache cũ khi kích hoạt
+self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then((keys) => {
+        caches.keys().then(keys => {
             return Promise.all(
-                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
             );
         })
     );
