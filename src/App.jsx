@@ -8,6 +8,7 @@ import DuAn from './pages/DuAn';
 import LichHen from './pages/LichHen';
 import Calculator from './pages/Calculator';
 import PushSubscribe from './components/PushSubscribe';
+import InstallPWAButton from './components/InstallPWAButton';
 
 // Ở phần render, sau khi user đã đăng nhập:
 
@@ -50,6 +51,7 @@ function App() {
           <Route path="/calculator" element={user ? <Calculator /> : <Navigate to="/" />} />
         </Routes>
       </div>
+      {user && <InstallPWAButton />}
       {user && <PushSubscribe />}
     </Router>
   );
