@@ -2,7 +2,7 @@
     "name": "SaleBDS",
     "short_name": "SaleBDS",
     "description": "Ứng dụng quản lý sale bất động sản",
-    "start_url": "/",
+    "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#f9fafb",
     "theme_color": "#059669",

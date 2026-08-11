@@ -1,38 +1,41 @@
-// Tên cache
 const CACHE_NAME = 'salebds-v1';
+const ASSETS_TO_CACHE = [
+    '/',
+    '/index.html',
+    '/manifest.json',
+    '/icon-192.png',
+    '/icon-512.png',
+];
 
-// Sự kiện install: cache các tài nguyên tĩnh
-self.addEventListener('install', event => {
+// Cài đặt SW và cache tài nguyên
+self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll([
-                '/',
-                '/index.html',
-                '/dashboard',
-                '/khach-hang',
-                '/du-an',
-                '/lich-hen',
-                '/calculator',
-            ]);
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS_TO_CACHE);
         })
     );
 });
 
-// Sự kiện fetch: ưu tiên lấy từ cache (offline), nếu không có thì lấy từ mạng
-self.addEventListener('fetch', event => {
+// Lấy tài nguyên từ cache hoặc mạng
+self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request).then(cachedResponse => {
-            return cachedResponse || fetch(event.request);
+        caches.match(event.request).then((cachedResponse) => {
+            return cachedResponse || fetch(event.request).then((response) => {
+                return caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, response.clone());
+                    return response;
+                });
+            });
         })
     );
 });
 
-// Sự kiện activate: dọn dẹp cache cũ
-self.addEventListener('activate', event => {
+// Dọn dẹp cache cũ khi kích hoạt
+self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then(keys => {
+        caches.keys().then((keys) => {
             return Promise.all(
-                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
             );
         })
     );
