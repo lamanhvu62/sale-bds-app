@@ -9,6 +9,8 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { KhachHangSkeleton } from '../components/Skeleton';
 import ImageOCRModal from '../components/ImageOCRModal';
 import MessageTemplateModal from '../components/MessageTemplateModal';
+import VoiceInput from '../components/VoiceInput';
+import { Mic } from 'lucide-react';
 
 const trangThaiConfig = {
   'tiem-nang': { label: 'Tiềm năng', color: 'bg-yellow-100 text-yellow-700' },
@@ -36,6 +38,7 @@ export default function KhachHang() {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showVoice, setShowVoice] = useState(false);
 
   const toast = useToast();
   const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
@@ -223,6 +226,28 @@ export default function KhachHang() {
     return isPotential && isOverdue;
   }).length;
 
+  const handleSaveFromVoice = async (customerData) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from('khach_hang').insert({
+      ten: customerData.ten,
+      sdt: customerData.sdt,
+      nhu_cau: customerData.nhuCau,
+      ngan_sach: customerData.nganSach,
+      khu_vuc: customerData.khuVuc,
+      ghi_chu: customerData.ghiChu,
+      trang_thai: customerData.trangThai || 'tiem-nang',
+      user_id: user.id,
+      last_contacted_at: new Date().toISOString(),
+    });
+    if (error) {
+      toast.error('Lỗi lưu: ' + error.message);
+      return;
+    }
+    toast.success('Đã thêm khách hàng!');
+    setShowVoice(false);
+    fetchKhachHang();
+  };
+
   // Đếm nhanh
   const countByStatus = (status) => khachHangList.filter(kh => kh.trang_thai === status).length;
 
@@ -249,6 +274,16 @@ export default function KhachHang() {
 
                 {showAddMenu && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border py-2 z-20 animate-in fade-in zoom-in-95 origin-top-right">
+                    <button
+                      onClick={() => { setShowVoice(true); setShowAddMenu(false); }}
+                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <Mic className="w-4 h-4 text-purple-500" />
+                      <div>
+                        <p className="font-medium text-gray-700">Nhập bằng giọng nói</p>
+                        <p className="text-xs text-gray-400">Nói thông tin khách</p>
+                      </div>
+                    </button>
                     <button
                       onClick={() => { openAddForm(); setShowAddMenu(false); }}
                       className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
@@ -633,6 +668,13 @@ export default function KhachHang() {
         <MessageTemplateModal
           onClose={() => setShowMessageModal(false)}
           customer={selectedCustomer}
+        />
+      )}
+
+      {showVoice && (
+        <VoiceInput
+          onClose={() => setShowVoice(false)}
+          onSave={handleSaveFromVoice}
         />
       )}
 
