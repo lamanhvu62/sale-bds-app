@@ -5,40 +5,17 @@ export function useSpeechRecognition() {
     const [transcript, setTranscript] = useState('');
     const [error, setError] = useState(null);
     const recognitionRef = useRef(null);
-    const retryCountRef = useRef(0);
+    const isListeningRef = useRef(false); // Thêm ref để tránh re-render
 
     const startListening = useCallback(async () => {
-        // Reset lỗi và transcript
         setError(null);
         setTranscript('');
+        if (isListeningRef.current) return; // Đang nghe rồi thì không tạo mới
 
-        // Kiểm tra hỗ trợ SpeechRecognition
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
             setError('Trình duyệt không hỗ trợ nhận dạng giọng nói');
             return;
-        }
-
-        // Kiểm tra và xin quyền microphone
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            try {
-                // Quan trọng: chủ động xin quyền mic trước
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                // Dừng stream ngay vì SpeechRecognition sẽ tự truy cập mic
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-            } catch (err) {
-                console.error('Lỗi xin quyền microphone:', err);
-                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                    setError('Bạn cần cấp quyền microphone để dùng giọng nói');
-                } else if (err.name === 'NotFoundError') {
-                    setError('Không tìm thấy microphone');
-                } else {
-                    setError('Không thể truy cập microphone: ' + err.message);
-                }
-                return;
-            }
         }
 
         // Dừng recognition cũ nếu có
@@ -46,15 +23,17 @@ export function useSpeechRecognition() {
             recognitionRef.current.onend = null;
             recognitionRef.current.onerror = null;
             recognitionRef.current.stop();
+            recognitionRef.current = null;
         }
 
         const recognition = new SpeechRecognition();
         recognition.lang = 'vi-VN';
-        recognition.continuous = true; // Cho phép nghe liên tục
+        recognition.continuous = false; // Chỉ nghe một lần, tránh lỗi trên Android
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
+            isListeningRef.current = true;
             setIsListening(true);
             setError(null);
         };
@@ -75,76 +54,45 @@ export function useSpeechRecognition() {
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
-            if (event.error === 'aborted') {
-                // Nếu bị aborted, cố gắng khởi động lại tối đa 2 lần
-                if (retryCountRef.current < 2) {
-                    retryCountRef.current += 1;
-                    setTimeout(() => {
-                        recognition.start();
-                    }, 500);
-                } else {
-                    retryCountRef.current = 0;
-                    setIsListening(false);
-                    setError('Quá trình nghe bị ngắt, hãy thử lại');
-                }
-            } else if (event.error === 'not-allowed') {
-                setIsListening(false);
+            if (event.error === 'not-allowed') {
                 setError('Bạn đã từ chối quyền microphone');
             } else if (event.error === 'no-speech') {
-                // Không nghe được gì, vẫn giữ trạng thái listening để người dùng nói tiếp
-                console.log('Không phát hiện giọng nói');
-            } else if (event.error === 'network') {
-                setIsListening(false);
-                setError('Lỗi mạng, hãy kiểm tra kết nối');
+                setError('Không nghe thấy giọng nói, hãy thử lại');
+            } else if (event.error === 'aborted') {
+                setError('Quá trình nghe bị ngắt, hãy thử lại');
             } else {
-                setIsListening(false);
                 setError('Lỗi: ' + event.error);
             }
+            isListeningRef.current = false;
+            setIsListening(false);
         };
 
         recognition.onend = () => {
-            // Nếu vẫn đang có ý định nghe và chưa có lỗi, tự khởi động lại
-            if (isListening && !error) {
-                // đôi khi onend được gọi mà không có lý do, khởi động lại nếu cần
-                // nhưng tránh loop vô hạn
-                if (retryCountRef.current < 2) {
-                    retryCountRef.current += 1;
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        console.log('Không thể khởi động lại:', e);
-                        retryCountRef.current = 0;
-                        setIsListening(false);
-                    }
-                } else {
-                    retryCountRef.current = 0;
-                    setIsListening(false);
-                }
-            } else {
-                retryCountRef.current = 0;
-                setIsListening(false);
-            }
+            isListeningRef.current = false;
+            setIsListening(false);
+            // Không tự khởi động lại, người dùng sẽ bấm nút lại nếu cần
         };
 
         recognitionRef.current = recognition;
-        retryCountRef.current = 0;
 
         try {
             recognition.start();
         } catch (err) {
             console.error('Lỗi khi start recognition:', err);
+            isListeningRef.current = false;
             setIsListening(false);
             setError('Không thể bắt đầu nhận dạng');
         }
-    }, [isListening, error]); // cần theo dõi isListening và error để tránh cập nhật sai
+    }, []); // Không cần dependency vì dùng ref
 
     const stopListening = useCallback(() => {
         if (recognitionRef.current) {
             recognitionRef.current.onend = null;
             recognitionRef.current.onerror = null;
             recognitionRef.current.stop();
+            recognitionRef.current = null;
         }
-        retryCountRef.current = 0;
+        isListeningRef.current = false;
         setIsListening(false);
     }, []);
 
