@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
   Plus, ChevronLeft, ChevronRight, MapPin, Clock, User, Building2,
-  MoreVertical, X, Check, Calendar, Phone
+  MoreVertical, X, Check, Calendar
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import BottomNav from '../components/BottomNav';
 import { useToast } from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { LichHenSkeleton, CalendarSkeleton } from '../components/Skeleton';
+import { LichHenSkeleton } from '../components/Skeleton';
 
 // Helper: format ngày giờ
 const formatDate = (date) => {
@@ -75,10 +75,10 @@ export default function LichHen() {
     fetchMonthAppointments();
   }, [currentMonth]);
 
-  // Fetch lịch hẹn của ngày được chọn
+  // Fetch lịch hẹn của ngày được chọn (chỉ phụ thuộc selectedDate)
   useEffect(() => {
     fetchDayAppointments(selectedDate);
-  }, [selectedDate, appointments]);
+  }, [selectedDate]);
 
   const fetchMonthAppointments = async () => {
     setLoading(true);
@@ -103,6 +103,7 @@ export default function LichHen() {
   };
 
   const fetchDayAppointments = async (date) => {
+    setLoading(true); // set loading khi fetch ngày
     const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
     const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59).toISOString();
 
@@ -119,6 +120,7 @@ export default function LichHen() {
     } else {
       setDayAppointments(data || []);
     }
+    setLoading(false);
   };
 
   // Tạo map ngày -> có lịch hẹn không
@@ -145,9 +147,17 @@ export default function LichHen() {
   // Mở form thêm mới
   const openAddForm = () => {
     setEditingAppt(null);
+    // Nếu selectedDate là hôm nay, dùng giờ hiện tại; ngược lại đặt 09:00
+    const isToday =
+      selectedDate.getDate() === today.getDate() &&
+      selectedDate.getMonth() === today.getMonth() &&
+      selectedDate.getFullYear() === today.getFullYear();
+    const defaultTime = isToday
+      ? new Date()
+      : new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 9, 0);
     setForm({
       tieu_de: '',
-      thoi_gian: formatDateTimeLocal(selectedDate),
+      thoi_gian: formatDateTimeLocal(defaultTime),
       dia_diem: '',
       khach_hang_id: '',
       du_an_id: '',
@@ -278,60 +288,58 @@ export default function LichHen() {
   if (week.length > 0) weeks.push(week);
 
   return (
-    <div className="pb-20 max-w-lg mx-auto">
-      {/* Header */}
-      <div className="bg-white p-4 sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-emerald-600" />
+    <div className="pb-24 max-w-lg mx-auto">
+      {/* Header & Calendar Controls */}
+      <div className="p-3 sticky top-0 z-20 bg-slate-900/95 backdrop-blur border-b border-white/5">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent flex items-center gap-1">
+            <Calendar className="w-4 h-4 text-emerald-400" />
             Lịch hẹn
           </h1>
           <button
             onClick={openAddForm}
-            className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all"
+            className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 text-xs font-semibold hover:bg-emerald-500 active:scale-95 transition-all"
           >
-            <Plus className="w-4 h-4" />
-            Thêm lịch
+            <Plus className="w-3.5 h-3.5" />
+            Lịch mới
           </button>
         </div>
 
-        {/* Điều hướng tháng */}
-        <div className="flex items-center justify-between mb-3">
-          <button onClick={goToPrevMonth} className="p-2 hover:bg-gray-100 rounded-full">
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+        {/* Month Selector - compact */}
+        <div className="flex items-center justify-between bg-slate-800/80 rounded-lg p-1">
+          <button onClick={goToPrevMonth} className="p-1 hover:bg-white/10 rounded text-gray-400">
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <h2 className="text-base font-semibold text-gray-800">
-            {currentMonth.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
-          </h2>
-          <button onClick={goToNextMonth} className="p-2 hover:bg-gray-100 rounded-full">
-            <ChevronRight className="w-5 h-5 text-gray-600" />
+          <div className="text-center">
+            <h2 className="text-xs font-bold text-gray-200 uppercase tracking-wide">
+              {currentMonth.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
+            </h2>
+            <button
+              onClick={goToToday}
+              className="text-[10px] font-medium text-emerald-500 hover:underline"
+            >
+              Hôm nay
+            </button>
+          </div>
+          <button onClick={goToNextMonth} className="p-1 hover:bg-white/10 rounded text-gray-400">
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Nút Hôm nay */}
-        <button
-          onClick={goToToday}
-          className="text-xs text-emerald-600 font-medium hover:underline"
-        >
-          Hôm nay
-        </button>
-
-        {/* Lịch tháng */}
-        <div className="mt-2 bg-gray-50 rounded-xl p-2">
+        {/* Mini Calendar View - compact */}
+        <div className="mt-2 bg-slate-900/70 rounded-xl p-2">
           <div className="grid grid-cols-7 mb-1">
             {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((thu) => (
-              <div key={thu} className="text-center text-xs font-medium text-gray-500 py-1">
+              <div key={thu} className="text-center text-[9px] font-bold text-slate-500 uppercase">
                 {thu}
               </div>
             ))}
           </div>
 
           {weeks.map((week, wi) => (
-            <div key={wi} className="grid grid-cols-7">
+            <div key={wi} className="grid grid-cols-7 gap-0.5">
               {week.map((day, di) => {
-                if (!day) {
-                  return <div key={`empty-${di}`} className="h-10" />;
-                }
+                if (!day) return <div key={`empty-${di}`} className="h-7" />;
 
                 const isToday =
                   day.getDate() === today.getDate() &&
@@ -348,16 +356,17 @@ export default function LichHen() {
                   <button
                     key={`${wi}-${di}`}
                     onClick={() => setSelectedDate(day)}
-                    className={`h-10 flex flex-col items-center justify-center rounded-lg transition-colors relative ${isSelected
-                      ? 'bg-emerald-600 text-white'
-                      : isToday
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'hover:bg-gray-100 text-gray-700'
-                      }`}
+                    className={`h-7 flex flex-col items-center justify-center rounded-lg transition-all relative ${
+                      isSelected
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : isToday
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'hover:bg-white/5 text-gray-400'
+                    }`}
                   >
-                    <span className="text-sm font-medium">{day.getDate()}</span>
+                    <span className="text-[10px] font-bold leading-none">{day.getDate()}</span>
                     {hasAppointments && (
-                      <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
+                      <span className={`absolute bottom-0.5 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
                     )}
                   </button>
                 );
@@ -367,98 +376,104 @@ export default function LichHen() {
         </div>
       </div>
 
-      {/* Danh sách lịch hẹn của ngày được chọn */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-800">
+      {/* Appointment List */}
+      <div className="p-4 space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
             📅 {formatDate(selectedDate)}
           </h3>
-          <span className="text-xs text-gray-400">{dayAppointments.length} lịch hẹn</span>
+          <span className="text-[10px] font-semibold bg-slate-800 text-slate-400 px-2 py-0.5 rounded-lg">
+            {dayAppointments.length} sự kiện
+          </span>
         </div>
 
         {loading ? (
-          <CalendarSkeleton />
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <LichHenSkeleton key={i} />
+            ))}
+          </div>
         ) : dayAppointments.length === 0 ? (
-          <div className="text-center py-8 bg-white rounded-xl">
-            <Calendar className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-gray-400 text-sm">Chưa có lịch hẹn nào</p>
+          <div className="text-center py-10 bg-slate-900 rounded-2xl border border-dashed border-slate-700">
+            <Calendar className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+            <p className="text-gray-400 text-sm font-medium">Trống lịch cho ngày này</p>
           </div>
         ) : (
           <div className="space-y-3">
             {dayAppointments.map((appt) => (
               <div
                 key={appt.id}
-                className={`bg-white rounded-xl p-4 shadow-sm border-l-4 ${appt.da_hoan_thanh ? 'border-gray-300 opacity-70' : 'border-emerald-500'
-                  }`}
+                className={`bg-slate-900 rounded-2xl p-4 border border-slate-800 transition-all ${
+                  appt.da_hoan_thanh ? 'opacity-50' : 'hover:border-emerald-500/30'
+                }`}
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h4 className={`font-semibold ${appt.da_hoan_thanh ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-sm font-bold text-emerald-400">{formatTime(new Date(appt.thoi_gian))}</span>
+                    </div>
+                    
+                    <h4 className={`text-base font-bold leading-tight mb-2 ${appt.da_hoan_thanh ? 'line-through text-gray-500' : 'text-gray-100'}`}>
                       {appt.tieu_de}
                     </h4>
-                    <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-                      <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span>{formatTime(new Date(appt.thoi_gian))}</span>
+
+                    <div className="space-y-1.5">
                       {appt.dia_diem && (
-                        <>
-                          <span className="mx-1">·</span>
-                          <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                          <MapPin className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
                           <span className="truncate">{appt.dia_diem}</span>
-                        </>
+                        </div>
+                      )}
+                      {appt.khach_hang && (
+                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                          <User className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                          <span className="text-emerald-500 font-medium">{appt.khach_hang.ten}</span>
+                          {appt.khach_hang.sdt && (
+                            <>
+                              <span className="text-slate-600">|</span>
+                              <span className="text-slate-400">{appt.khach_hang.sdt}</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {appt.du_an && (
+                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                          <Building2 className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                          <span className="text-blue-400">{appt.du_an.ten}</span>
+                        </div>
                       )}
                     </div>
-                    {appt.khach_hang && (
-                      <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                        <User className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>{appt.khach_hang.ten}</span>
-                        {appt.khach_hang.sdt && (
-                          <>
-                            <span className="mx-1">·</span>
-                            <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                            <span>{appt.khach_hang.sdt}</span>
-                          </>
-                        )}
-                      </div>
-                    )}
-                    {appt.du_an && (
-                      <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                        <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>{appt.du_an.ten}</span>
-                      </div>
-                    )}
+
                     {appt.ghi_chu && (
-                      <p className="text-xs text-gray-400 mt-1 italic">📝 {appt.ghi_chu}</p>
+                      <div className="mt-3 p-2.5 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                        <p className="text-xs text-gray-400 italic">“ {appt.ghi_chu} ”</p>
+                      </div>
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-1 ml-2">
+                  <div className="flex flex-col gap-2 shrink-0">
                     <button
                       onClick={() => toggleComplete(appt)}
-                      className={`p-1.5 rounded-full ${appt.da_hoan_thanh
-                        ? 'bg-emerald-100 text-emerald-600'
-                        : 'bg-gray-100 text-gray-400 hover:text-emerald-600'
-                        }`}
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                        appt.da_hoan_thanh
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-slate-800 text-slate-500 hover:bg-emerald-500/20 hover:text-emerald-400'
+                      }`}
                       title={appt.da_hoan_thanh ? 'Đánh dấu chưa xong' : 'Đánh dấu đã xong'}
                     >
                       <Check className="w-4 h-4" />
                     </button>
                     <div className="relative group/menu">
-                      <button className="p-1.5 hover:bg-gray-100 rounded-full">
-                        <MoreVertical className="w-4 h-4 text-gray-400" />
+                      <button className="w-8 h-8 bg-slate-800 text-slate-500 rounded-xl flex items-center justify-center hover:bg-slate-700">
+                        <MoreVertical className="w-4 h-4" />
                       </button>
-                      <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-20 min-w-[100px] border">
-                        <button
-                          onClick={() => openEditForm(appt)}
-                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
-                        >
-                          ✏️ Sửa
+                      <div className="absolute right-0 top-10 bg-slate-900 shadow-2xl rounded-xl py-1.5 hidden group-hover/menu:block z-20 min-w-[140px] border border-slate-700 overflow-hidden">
+                        <button onClick={() => openEditForm(appt)} className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-slate-800 flex items-center gap-2">
+                          ✏️ Chỉnh sửa
                         </button>
-                        <button
-                          onClick={() => handleDeleteRequest(appt.id)}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-                        >
-                          🗑️ Xóa
+                        <button onClick={() => handleDeleteRequest(appt.id)} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2">
+                          🗑️ Hủy lịch
                         </button>
                       </div>
                     </div>
@@ -472,56 +487,56 @@ export default function LichHen() {
 
       {/* ========== FORM MODAL ========== */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center">
-          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 z-30 flex items-end justify-center">
+          <div className="bg-slate-900 rounded-t-2xl w-full max-w-lg p-5 max-h-[85vh] overflow-y-auto shadow-2xl border-t border-slate-700">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800">
+              <h2 className="text-lg font-bold text-gray-100">
                 {editingAppt ? 'Sửa lịch hẹn' : 'Thêm lịch hẹn mới'}
               </h2>
-              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-100 rounded-full">
+              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-800 rounded-full">
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tiêu đề <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Tiêu đề <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={form.tieu_de}
                   onChange={(e) => setForm({ ...form, tieu_de: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   placeholder="VD: Dẫn khách xem căn hộ"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Thời gian <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Thời gian <span className="text-red-500">*</span></label>
                 <input
                   type="datetime-local"
                   value={form.thoi_gian}
                   onChange={(e) => setForm({ ...form, thoi_gian: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Địa điểm</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Địa điểm</label>
                 <input
                   type="text"
                   value={form.dia_diem}
                   onChange={(e) => setForm({ ...form, dia_diem: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   placeholder="VD: Vinhomes Grand Park"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Khách hàng</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Khách hàng</label>
                 <select
                   value={form.khach_hang_id}
                   onChange={(e) => setForm({ ...form, khach_hang_id: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   <option value="">-- Chọn khách hàng --</option>
                   {khachHangList.map((kh) => (
@@ -533,11 +548,11 @@ export default function LichHen() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dự án</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Dự án</label>
                 <select
                   value={form.du_an_id}
                   onChange={(e) => setForm({ ...form, du_an_id: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   <option value="">-- Chọn dự án --</option>
                   {duAnList.map((da) => (
@@ -549,12 +564,12 @@ export default function LichHen() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Ghi chú</label>
                 <textarea
                   value={form.ghi_chu}
                   onChange={(e) => setForm({ ...form, ghi_chu: e.target.value })}
                   rows={2}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                   placeholder="Ghi chú thêm..."
                 />
               </div>
@@ -566,14 +581,14 @@ export default function LichHen() {
                   onChange={(e) => setForm({ ...form, da_hoan_thanh: e.target.checked })}
                   className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                 />
-                <span className="text-sm text-gray-700">Đã hoàn thành</span>
+                <span className="text-sm text-gray-300">Đã hoàn thành</span>
               </label>
             </div>
 
-            <div className="flex gap-3 mt-5 pt-3 border-t border-gray-100">
+            <div className="flex gap-3 mt-5 pt-3 border-t border-slate-700">
               <button
                 onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
+                className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium text-gray-300 hover:bg-slate-700"
               >
                 Hủy
               </button>

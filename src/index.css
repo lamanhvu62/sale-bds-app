@@ -12,210 +12,82 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(16, 185, 129, 0.2), transparent 30%),
-    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  background: 
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.1), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.1), transparent 40%),
+    #020617;
   color: #f8fafc;
+  background-attachment: fixed;
 }
 
 #root {
   min-height: 100vh;
 }
 
-button {
-  color: inherit;
+/* Tối ưu hóa Scrollbar cho Dark Mode */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
 }
 
-input,
-textarea,
-select {
-  background-color: #111827 !important;
-  color: #f8fafc !important;
-  border-color: #334155 !important;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #64748b !important;
-}
-
-select option {
-  background-color: #111827;
-  color: #f8fafc;
-}
-
+/* Override Tailwind Classes cho Dark Mode đồng nhất */
 .bg-white {
-  background-color: #111827 !important;
+  background-color: #0f172a !important; /* Slate 900 */
+  border: 1px solid #1e293b;
 }
 
-.bg-gray-50 {
-  background-color: #020617 !important;
+.bg-gray-50, .bg-gray-100 {
+  background-color: #1e293b !important; /* Slate 800 */
 }
 
-.bg-gray-100 {
-  background-color: #111827 !important;
+/* Glassmorphism cho Header & Nav */
+.glass-effect {
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.bg-gray-200 {
-  background-color: #334155 !important;
-}
-
-.bg-gray-300 {
-  background-color: #475569 !important;
-}
-
-.bg-emerald-50 {
-  background-color: #052e16 !important;
-}
-
-.bg-emerald-100 {
-  background-color: #064e3b !important;
-}
-
-.bg-green-50 {
-  background-color: #052e16 !important;
-}
-
-.bg-green-100 {
-  background-color: #14532d !important;
-}
-
-.bg-yellow-50 {
-  background-color: #422006 !important;
-}
-
-.bg-yellow-100 {
-  background-color: #713f12 !important;
-}
-
-.bg-blue-50 {
-  background-color: #172554 !important;
-}
-
-.bg-blue-100 {
-  background-color: #1d4ed8 !important;
-}
-
-.bg-orange-50 {
-  background-color: #431407 !important;
-}
-
-.bg-orange-100 {
-  background-color: #9a2c0d !important;
-}
-
-.bg-purple-50 {
-  background-color: #2e1065 !important;
-}
-
-.bg-purple-100 {
-  background-color: #581c87 !important;
-}
-
-.text-gray-800 {
+/* Tối ưu Input */
+input, textarea, select {
+  background-color: #1e293b !important;
   color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  transition: all 0.2s ease;
 }
 
-.text-gray-700 {
-  color: #e2e8f0 !important;
-}
-
-.text-gray-600 {
-  color: #cbd5e1 !important;
-}
-
-.text-gray-500 {
-  color: #94a3b8 !important;
-}
-
-.text-gray-400 {
-  color: #64748b !important;
-}
-
-.text-gray-300 {
-  color: #475569 !important;
-}
-
-.text-emerald-500 {
-  color: #10b981 !important;
-}
-
-.text-emerald-600 {
-  color: #34d399 !important;
-}
-
-.text-emerald-700 {
-  color: #6ee7b7 !important;
-}
-
-.text-green-600 {
-  color: #4ade80 !important;
-}
-
-.text-green-700 {
-  color: #86efac !important;
-}
-
-.text-yellow-600 {
-  color: #fbbf24 !important;
-}
-
-.text-yellow-700 {
-  color: #fde68a !important;
-}
-
-.text-blue-600 {
-  color: #60a5fa !important;
-}
-
-.text-blue-700 {
-  color: #93c5fd !important;
-}
-
-.text-red-600,
-.text-red-500 {
-  color: #f87171 !important;
-}
-
-.border-gray-300 {
-  border-color: #334155 !important;
-}
-
-.border-gray-200 {
-  border-color: #475569 !important;
-}
-
-.border-gray-100 {
-  border-color: #1f2937 !important;
-}
-
-.border-emerald-500 {
+input:focus {
   border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
 }
 
-.shadow-sm {
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.6) !important;
+/* Các trạng thái (Badges) - Giảm độ chói */
+.bg-emerald-50, .bg-green-50 { background-color: rgba(16, 185, 129, 0.1) !important; }
+.bg-blue-50 { background-color: rgba(59, 130, 246, 0.1) !important; }
+.bg-yellow-50 { background-color: rgba(245, 158, 11, 0.1) !important; }
+.bg-red-50 { background-color: rgba(239, 68, 68, 0.1) !important; }
+
+/* Text colors */
+.text-gray-800 { color: #f1f5f9 !important; }
+.text-gray-600, .text-gray-500 { color: #94a3b8 !important; } /* Slate 400 */
+.text-gray-400 { color: #64748b !important; }
+
+/* Shadow - Trong Dark Mode nên dùng border hơn là shadow mạnh */
+.shadow-sm, .shadow-md, .shadow-lg {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
 }
 
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(2, 6, 23, 0.7) !important;
-}
-
-.shadow-xl {
-  box-shadow: 0 25px 50px -12px rgba(2, 6, 23, 0.7) !important;
-}
-
+/* Card hover */
 .hover\:bg-gray-50:hover {
-  background-color: #0f172a !important;
+  background-color: #1e293b !important;
 }
 
-.hover\:bg-gray-100:hover {
-  background-color: #1f2937 !important;
-}
-
-.hover\:bg-emerald-50:hover {
-  background-color: #052e16 !important;
-}
 
 /* Hiệu ứng sóng lan tỏa cho mic */
 @keyframes wave {

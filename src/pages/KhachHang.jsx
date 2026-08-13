@@ -309,378 +309,361 @@ export default function KhachHang() {
     khachHangList.filter((kh) => kh.trang_thai === status).length;
 
   return (
-    <div className="pb-20 max-w-lg mx-auto">
+        <div className="pb-24 max-w-lg mx-auto">
       {/* Header */}
-      <div className="bg-white p-4 sticky top-0 z-10 shadow-sm">
-        {/* Header */}
-        <div className="bg-white p-4 sticky top-0 z-10 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-bold text-gray-800">Khách hàng</h1>
+      <div className="glass-effect p-4 sticky top-0 z-20">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-black bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+            Khách hàng
+          </h1>
 
-            <div className="relative" ref={addMenuRef}>
-              {/* ===== Dropdown Thêm mới ===== */}
-              <div className="relative">
+          <div className="relative" ref={addMenuRef}>
+            <button
+              onClick={() => setShowAddMenu(!showAddMenu)}
+              className="bg-emerald-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-bold hover:bg-emerald-500 active:scale-95 transition-all shadow-lg shadow-emerald-900/20"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${showAddMenu ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {showAddMenu && (
+              <div className="absolute right-0 mt-2 w-56 bg-slate-900 rounded-2xl shadow-2xl border border-white/10 py-2 z-30 animate-in fade-in zoom-in-95 origin-top-right">
                 <button
-                  onClick={() => setShowAddMenu(!showAddMenu)}
-                  className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all"
+                  onClick={() => {
+                    setShowVoice(true);
+                    setShowAddMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 flex items-center gap-3 transition-colors"
                 >
-                  <Plus className="w-4 h-4" />
-                  Thêm mới
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${showAddMenu ? "rotate-180" : ""}`}
-                  />
-                </button>
-
-                {showAddMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border py-2 z-20 animate-in fade-in zoom-in-95 origin-top-right">
-                    <button
-                      onClick={() => {
-                        setShowVoice(true);
-                        setShowAddMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <Mic className="w-4 h-4 text-purple-500" />
-                      <div>
-                        <p className="font-medium text-gray-700">
-                          Nhập bằng giọng nói
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          Nói thông tin khách
-                        </p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => {
-                        openAddForm();
-                        setShowAddMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <Zap className="w-4 h-4 text-emerald-500" />
-                      <div>
-                        <p className="font-medium text-gray-700">Thêm nhanh</p>
-                        <p className="text-xs text-gray-400">Chỉ Tên + SĐT</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowQuickAdd(true);
-                        setShowAddMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <Sparkles className="w-4 h-4 text-purple-500" />
-                      <div>
-                        <p className="font-medium text-gray-700">Quick Add</p>
-                        <p className="text-xs text-gray-400">
-                          Parse từ đoạn text
-                        </p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowImport(true);
-                        setShowAddMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <Upload className="w-4 h-4 text-blue-500" />
-                      <div>
-                        <p className="font-medium text-gray-700">
-                          Import Excel
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          Từ file .xlsx, .csv
-                        </p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowOCR(true);
-                        setShowAddMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <Camera className="w-4 h-4 text-orange-500" />
-                      <div>
-                        <p className="font-medium text-gray-700">Quét ảnh</p>
-                        <p className="text-xs text-gray-400">
-                          Nhận dạng từ ảnh
-                        </p>
-                      </div>
-                    </button>
+                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                    <Mic className="w-4 h-4 text-purple-400" />
                   </div>
-                )}
+                  <div>
+                    <p className="font-bold text-gray-200">Giọng nói</p>
+                    <p className="text-[10px] text-gray-500">Nói để nhập liệu</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    openAddForm();
+                    setShowAddMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 flex items-center gap-3 transition-colors"
+                >
+                  <div className="p-2 bg-emerald-500/10 rounded-lg">
+                    <Zap className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-200">Thêm nhanh</p>
+                    <p className="text-[10px] text-gray-500">Chỉ Tên + SĐT</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowQuickAdd(true);
+                    setShowAddMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 flex items-center gap-3 transition-colors"
+                >
+                  <div className="p-2 bg-blue-500/10 rounded-lg">
+                    <Sparkles className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-200">AI Parse</p>
+                    <p className="text-[10px] text-gray-500">Tách từ đoạn chat</p>
+                  </div>
+                </button>
+                <div className="h-px bg-white/5 my-1 mx-2"></div>
+                <button
+                  onClick={() => {
+                    setShowImport(true);
+                    setShowAddMenu(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-white/5 flex items-center gap-3 text-gray-400"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Import Excel</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowOCR(true);
+                    setShowAddMenu(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-white/5 flex items-center gap-3 text-gray-400"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Quét ảnh (OCR)</span>
+                </button>
               </div>
-            </div>
-          </div>
-
-          {/* Search */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm theo tên hoặc SĐT..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
+            )}
           </div>
         </div>
 
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Tìm theo tên hoặc SĐT..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border-white/5 rounded-2xl text-sm focus:ring-emerald-500 transition-all"
+          />
+        </div>
+
         {/* Filter */}
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setFilterStatus("all")}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               filterStatus === "all"
-                ? "bg-emerald-600 text-white"
-                : "bg-gray-100 text-gray-600"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20"
+                : "bg-slate-800 text-gray-400 border border-white/5"
             }`}
           >
             Tất cả ({khachHangList.length})
           </button>
           <button
             onClick={() => setFilterStatus("can-follow-up")}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               filterStatus === "can-follow-up"
-                ? "bg-emerald-600 text-white"
-                : "bg-gray-100 text-gray-600"
+                ? "bg-orange-600 text-white shadow-lg shadow-orange-900/20"
+                : "bg-slate-800 text-gray-400 border border-white/5"
             }`}
           >
-            Cần follow-up ({countCanFollowUp})
+            Cần chăm ({countCanFollowUp})
           </button>
           {Object.entries(trangThaiConfig).map(([key, value]) => (
             <button
               key={key}
               onClick={() => setFilterStatus(key)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 filterStatus === key
-                  ? "bg-emerald-600 text-white"
-                  : "bg-gray-100 text-gray-600"
+                  ? "bg-slate-200 text-slate-900"
+                  : "bg-slate-800 text-gray-400 border border-white/5"
               }`}
             >
-              {value.label} ({countByStatus(key)})
+              {value.label}
             </button>
           ))}
         </div>
       </div>
 
       {/* Danh sách khách hàng */}
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-4">
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[...Array(4)].map((_, i) => (
               <KhachHangSkeleton key={i} />
             ))}
           </div>
         ) : filteredList.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-3">📭</div>
-            <p className="text-gray-400">
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-white/10">
+            <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-10 h-10 text-slate-600" />
+            </div>
+            <p className="text-gray-500 font-medium">
               {searchTerm
                 ? "Không tìm thấy khách hàng phù hợp"
                 : "Chưa có khách hàng nào"}
             </p>
             <button
               onClick={openAddForm}
-              className="text-emerald-600 text-sm mt-2 font-medium"
+              className="text-emerald-500 text-sm mt-4 font-bold hover:underline"
             >
-              + Thêm khách hàng đầu tiên
+              + Thêm khách hàng ngay
             </button>
           </div>
         ) : (
           filteredList.map((kh) => (
             <div
               key={kh.id}
-              className="bg-white rounded-xl p-4 shadow-sm relative group/card"
+              className="bg-white rounded-2xl p-5 border border-white/5 relative group/card transition-all hover:border-emerald-500/20"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-800 truncate">
+                  <h3 className="font-bold text-gray-100 text-lg leading-tight mb-1">
                     {kh.ten}
                   </h3>
-                  <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                    <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="mr-1">{kh.sdt}</span>
-                    <a
-                      href={`tel:${kh.sdt}`}
-                      className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-green-50 text-green-600 hover:bg-green-100 active:scale-90 transition-all"
-                      title="Gọi điện"
-                    >
-                      <PhoneCall className="w-3.5 h-3.5" />
-                    </a>
-                    <a
-                      href={`https://zalo.me/${kh.sdt}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 active:scale-90 transition-all"
-                      title="Chat Zalo"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                  {kh.khu_vuc && (
-                    <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                      <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span className="truncate">{kh.khu_vuc}</span>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-1.5 text-sm text-gray-400">
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>{kh.sdt}</span>
                     </div>
-                  )}
+                    {kh.khu_vuc && (
+                      <div className="flex items-center gap-1.5 text-sm text-gray-400">
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span className="truncate max-w-[120px]">{kh.khu_vuc}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                  <div className="flex flex-col items-end gap-1">
+                <div className="flex items-start gap-2">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${trangThaiConfig[kh.trang_thai]?.color || "bg-gray-100 text-gray-700"}`}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${trangThaiConfig[kh.trang_thai]?.color || "bg-slate-800 text-gray-400"}`}
                   >
                     {trangThaiConfig[kh.trang_thai]?.label || kh.trang_thai}
                   </span>
-                    <button
-                      onClick={() => {
-                        setSuggestionCustomer(kh);
-                        setShowSuggestion(true);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      🏠 Gợi ý dự án
-                    </button>
-                  </div>
                   <div className="relative group/menu">
-                    <button className="p-1 hover:bg-gray-100 rounded">
-                      <MoreVertical className="w-4 h-4 text-gray-400" />
+                    <button className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+                      <MoreVertical className="w-4 h-4 text-gray-500" />
                     </button>
-                    <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-10 min-w-[100px] border">
+                    <div className="absolute right-0 top-8 bg-slate-900 shadow-2xl rounded-2xl py-2 hidden group-hover/menu:block z-20 min-w-[140px] border border-white/10 overflow-hidden">
                       <button
                         onClick={() => openEditForm(kh)}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 flex items-center gap-2 text-gray-300"
                       >
-                        ✏️ Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDeleteRequest(kh.id)}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-                      >
-                        🗑️ Xóa
+                        ✏️ Chỉnh sửa
                       </button>
                       <button
                         onClick={() => {
                           setSelectedCustomer(kh);
                           setShowMessageModal(true);
                         }}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 flex items-center gap-2 text-gray-300"
                       >
-                        💬 Nhắn tin
+                        💬 Gửi tin nhắn
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSuggestionCustomer(kh);
+                          setShowSuggestion(true);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 flex items-center gap-2 text-gray-300"
+                      >
+                        🏠 Gợi ý dự án
                       </button>
                       <button
                         onClick={() => handleMarkContacted(kh.id)}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 flex items-center gap-2 text-gray-300"
                       >
-                        ✅ Đã liên hệ
+                        ✅ Đã chăm sóc
+                      </button>
+                      <div className="h-px bg-white/5 my-1"></div>
+                      <button
+                        onClick={() => handleDeleteRequest(kh.id)}
+                        className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2"
+                      >
+                        🗑️ Xóa khách
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Tags */}
-              <div className="mt-3 flex flex-wrap gap-2">
-                {kh.nhu_cau && (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                    {kh.nhu_cau}
-                  </span>
-                )}
-                {kh.ngan_sach && (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                    {kh.ngan_sach}
-                  </span>
-                )}
-                {kh.nguon && (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                    📌 {kh.nguon}
-                  </span>
-                )}
+              {/* Action Buttons */}
+              <div className="mt-5 pt-4 border-t border-white/5 flex items-center gap-2">
+                <a
+                  href={`tel:${kh.sdt}`}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl text-xs font-bold hover:bg-emerald-500/20 transition-all active:scale-95"
+                >
+                  <PhoneCall className="w-3.5 h-3.5" /> Gọi điện
+                </a>
+                <a
+                  href={`https://zalo.me/${kh.sdt}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-500/10 text-blue-500 rounded-xl text-xs font-bold hover:bg-blue-500/20 transition-all active:scale-95"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" /> Zalo
+                </a>
               </div>
 
-              {kh.ghi_chu && (
-                <p className="mt-2 text-xs text-gray-400 italic line-clamp-1">
-                  📝 {kh.ghi_chu}
-                </p>
+              {/* Tags & Ghi chú */}
+              {(kh.nhu_cau || kh.ngan_sach || kh.ghi_chu) && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {kh.nhu_cau && (
+                    <span className="text-[10px] font-bold bg-slate-800 text-slate-400 px-2 py-1 rounded-md">
+                      {kh.nhu_cau}
+                    </span>
+                  )}
+                  {kh.ngan_sach && (
+                    <span className="text-[10px] font-bold bg-slate-800 text-slate-400 px-2 py-1 rounded-md">
+                      💰 {kh.ngan_sach}
+                    </span>
+                  )}
+                  {kh.ghi_chu && (
+                    <p className="w-full mt-2 text-xs text-gray-500 italic line-clamp-2 bg-slate-800/30 p-2 rounded-lg border border-white/5">
+                      “ {kh.ghi_chu} ”
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           ))
         )}
       </div>
 
-      {/* ========== FORM THÊM NHANH (MODAL) ========== */}
+      {/* ========== FORM MODAL ========== */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center overflow-hidden">
-          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto overflow-x-hidden shadow-2xl box-border">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Zap className="w-4 h-4 text-emerald-600" />
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end justify-center">
+          <div className="bg-slate-900 rounded-t-[32px] w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto shadow-2xl border-t border-white/10 animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-emerald-400" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-800 truncate">
-                  {editingKhach ? "Sửa khách hàng" : "Thêm khách hàng nhanh"}
-                </h2>
+                <div>
+                  <h2 className="text-xl font-black text-gray-100">
+                    {editingKhach ? "Sửa thông tin" : "Thêm khách mới"}
+                  </h2>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Thông tin chi tiết</p>
+                </div>
               </div>
               <button
                 onClick={() => setShowForm(false)}
-                className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
+                className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors"
               >
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
-            {/* === FIELD BẮT BUỘC === */}
-            <div className="space-y-3 mb-2">
-              {/* Tên */}
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tên khách hàng <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
+                  Họ và tên <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={form.ten}
                   onChange={(e) => setForm({ ...form, ten: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border"
-                  placeholder="Nhập tên khách hàng"
+                  className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm focus:ring-emerald-500"
+                  placeholder="VD: Nguyễn Văn A"
                   autoFocus
                 />
               </div>
 
-              {/* SĐT */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
                   Số điện thoại <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
                   value={form.sdt}
                   onChange={(e) => setForm({ ...form, sdt: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border"
-                  placeholder="Nhập số điện thoại"
+                  className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm focus:ring-emerald-500"
+                  placeholder="VD: 0901234567"
                 />
               </div>
 
-              {/* Trạng thái */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trạng thái
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
+                  Trạng thái khách hàng
                 </label>
-                <div className="flex gap-2 flex-wrap">
+                <div className="grid grid-cols-2 gap-2">
                   {Object.entries(trangThaiConfig).map(([key, value]) => (
                     <button
                       key={key}
                       type="button"
                       onClick={() => setForm({ ...form, trangThai: key })}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                      className={`px-3 py-3 rounded-xl text-xs font-bold transition-all border ${
                         form.trangThai === key
-                          ? "ring-2 ring-emerald-500 ring-offset-1 " +
-                            value.color
-                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                          ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/40"
+                          : "bg-slate-800 border-white/5 text-gray-400 hover:bg-slate-750"
                       }`}
                     >
                       {value.label}
@@ -688,154 +671,112 @@ export default function KhachHang() {
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Toggle chi tiết */}
-            <button
-              type="button"
-              onClick={() => setShowDetails(!showDetails)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors mb-2"
-            >
-              {showDetails ? (
-                <>
-                  <ChevronUp className="w-4 h-4 flex-shrink-0" /> Ẩn chi tiết
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="w-4 h-4 flex-shrink-0" /> Thêm chi
-                  tiết (nhu cầu, ngân sách...)
-                </>
+              <button
+                type="button"
+                onClick={() => setShowDetails(!showDetails)}
+                className="w-full flex items-center justify-between px-4 py-4 bg-slate-800/50 rounded-2xl border border-dashed border-white/10 text-sm font-bold text-gray-400 hover:text-emerald-400 transition-colors"
+              >
+                <span>Mở rộng thêm chi tiết</span>
+                {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {showDetails && (
+                <div className="space-y-5 animate-in fade-in slide-in-from-top-2">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
+                      Nhu cầu sản phẩm
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {nhuCauOptions.map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              nhuCau: form.nhuCau === option ? "" : option,
+                            })
+                          }
+                          className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                            form.nhuCau === option
+                              ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
+                              : "bg-slate-800 text-gray-400 border border-white/5"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
+                        Ngân sách
+                      </label>
+                      <input
+                        type="text"
+                        value={form.nganSach}
+                        onChange={(e) =>
+                          setForm({ ...form, nganSach: e.target.value })
+                        }
+                        className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm"
+                        placeholder="VD: 5 tỷ"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
+                        Khu vực
+                      </label>
+                      <input
+                        type="text"
+                        value={form.khuVuc}
+                        onChange={(e) =>
+                          setForm({ ...form, khuVuc: e.target.value })
+                        }
+                        className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm"
+                        placeholder="VD: Quận 7"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
+                      Ghi chú thêm
+                    </label>
+                    <textarea
+                      value={form.ghiChu}
+                      onChange={(e) =>
+                        setForm({ ...form, ghiChu: e.target.value })
+                      }
+                      rows={3}
+                      className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm resize-none"
+                      placeholder="Thông tin bổ sung về khách hàng..."
+                    />
+                  </div>
+                </div>
               )}
-            </button>
 
-            {/* === FIELD CHI TIẾT === */}
-            {showDetails && (
-              <div className="space-y-3 pt-2 border-t border-gray-100">
-                {/* Nhu cầu */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nhu cầu
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {nhuCauOptions.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() =>
-                          setForm({
-                            ...form,
-                            nhuCau: form.nhuCau === option ? "" : option,
-                          })
-                        }
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                          form.nhuCau === option
-                            ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500"
-                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Ngân sách + Khu vực */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="min-w-0">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Ngân sách
-                    </label>
-                    <input
-                      type="text"
-                      value={form.nganSach}
-                      onChange={(e) =>
-                        setForm({ ...form, nganSach: e.target.value })
-                      }
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border"
-                      placeholder="VD: 2-3 tỷ"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Khu vực
-                    </label>
-                    <input
-                      type="text"
-                      value={form.khuVuc}
-                      onChange={(e) =>
-                        setForm({ ...form, khuVuc: e.target.value })
-                      }
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border"
-                      placeholder="VD: Quận 2"
-                    />
-                  </div>
-                </div>
-
-                {/* Nguồn */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nguồn khách
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {nguonOptions.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() =>
-                          setForm({
-                            ...form,
-                            nguon: form.nguon === option ? "" : option,
-                          })
-                        }
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                          form.nguon === option
-                            ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500"
-                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Ghi chú */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ghi chú
-                  </label>
-                  <textarea
-                    value={form.ghiChu}
-                    onChange={(e) =>
-                      setForm({ ...form, ghiChu: e.target.value })
-                    }
-                    rows={2}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-full box-border resize-none"
-                    placeholder="Ghi chú nhanh..."
-                  />
-                </div>
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="flex-1 px-4 py-4 bg-slate-800 text-gray-400 rounded-2xl text-sm font-bold hover:bg-slate-750 transition-all"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="flex-[2] px-4 py-4 bg-emerald-600 text-white rounded-2xl text-sm font-black hover:bg-emerald-500 active:scale-95 transition-all shadow-xl shadow-emerald-900/30 flex items-center justify-center gap-2"
+                >
+                  {editingKhach ? "Cập nhật ngay" : "Lưu khách hàng"}
+                </button>
               </div>
-            )}
-
-            {/* Nút Lưu */}
-            <div className="flex gap-3 mt-5 pt-3 border-t border-gray-100">
-              <button
-                onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 min-w-0"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSave}
-                className="flex-[2] px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-w-0"
-              >
-                <Zap className="w-4 h-4 flex-shrink-0" />
-                {editingKhach ? "Cập nhật" : "Lưu ngay"}
-              </button>
             </div>
           </div>
         </div>
       )}
+
 
       {/* Import Modal */}
       {showImport && (

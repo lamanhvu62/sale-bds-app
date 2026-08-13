@@ -322,104 +322,99 @@ export default function DuAn() {
   };
 
   return (
-    <div className="pb-20 max-w-lg mx-auto">
-      <div className="bg-white p-4 sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-lg font-bold text-gray-800">Dự án</h1>
+        <div className="pb-24 max-w-lg mx-auto">
+      {/* Header & Stats */}
+      <div className="glass-effect p-4 sticky top-0 z-20">
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-xl font-black bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+            Dự án BĐS
+          </h1>
           <button
             onClick={openAddForm}
-            className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all"
+            className="bg-emerald-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-bold hover:bg-emerald-500 active:scale-95 transition-all shadow-lg shadow-emerald-900/20"
           >
             <Plus className="w-4 h-4" />
-            Thêm dự án
+            Dự án mới
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          <div className="bg-emerald-50 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-emerald-700">{stats.tong}</p>
-            <p className="text-xs text-emerald-600">Tổng</p>
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="bg-slate-800/50 border border-white/5 rounded-2xl p-3 text-center">
+            <p className="text-lg font-black text-gray-100">{stats.tong}</p>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tổng kho</p>
           </div>
-          <div className="bg-green-50 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-green-700">{stats.dangBan}</p>
-            <p className="text-xs text-green-600">Đang bán</p>
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 text-center">
+            <p className="text-lg font-black text-emerald-400">{stats.dangBan}</p>
+            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Đang bán</p>
           </div>
-          <div className="bg-yellow-50 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-yellow-700">{stats.sapBan}</p>
-            <p className="text-xs text-yellow-600">Sắp bán</p>
+          <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-3 text-center">
+            <p className="text-lg font-black text-orange-400">{stats.sapBan}</p>
+            <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Sắp mở</p>
           </div>
         </div>
 
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Tìm theo tên, vị trí, chủ đầu tư..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-        </div>
+        {/* Search & Lọc */}
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Tìm theo tên, vị trí, chủ đầu tư..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border-white/5 rounded-2xl text-sm focus:ring-emerald-500 transition-all"
+            />
+          </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          <select
-            value={filterLoaiHinh}
-            onChange={(e) => setFilterLoaiHinh(e.target.value)}
-            className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border-none focus:ring-2 focus:ring-emerald-500"
-          >
-            <option value="all">Tất cả loại hình</option>
-            {loaiHinhOptions.map((lh) => (
-              <option key={lh} value={lh}>
-                {lh}
-              </option>
-            ))}
-          </select>
-          <select
-            value={filterTienDo}
-            onChange={(e) => setFilterTienDo(e.target.value)}
-            className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border-none focus:ring-2 focus:ring-emerald-500"
-          >
-            <option value="all">Tất cả tiến độ</option>
-            {tienDoOptions.map((td) => (
-              <option key={td.value} value={td.value}>
-                {td.label}
-              </option>
-            ))}
-          </select>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <select
+              value={filterLoaiHinh}
+              onChange={(e) => setFilterLoaiHinh(e.target.value)}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-gray-300 border-white/5 focus:ring-emerald-500"
+            >
+              <option value="all">Mọi loại hình</option>
+              {loaiHinhOptions.map((lh) => (
+                <option key={lh} value={lh}>{lh}</option>
+              ))}
+            </select>
+            <select
+              value={filterTienDo}
+              onChange={(e) => setFilterTienDo(e.target.value)}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-gray-300 border-white/5 focus:ring-emerald-500"
+            >
+              <option value="all">Mọi tiến độ</option>
+              {tienDoOptions.map((td) => (
+                <option key={td.value} value={td.value}>{td.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      {/* Danh sách dự án */}
+      <div className="p-4 space-y-4">
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <DuAnSkeleton key={i} />
             ))}
           </div>
         ) : filteredList.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-3">🏢</div>
-            <p className="text-gray-400">
-              {searchTerm
-                ? "Không tìm thấy dự án phù hợp"
-                : "Chưa có dự án nào"}
-            </p>
-            <button
-              onClick={openAddForm}
-              className="text-emerald-600 text-sm mt-2 font-medium"
-            >
-              + Thêm dự án đầu tiên
-            </button>
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-white/10">
+            <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Building2 className="w-10 h-10 text-slate-600" />
+            </div>
+            <p className="text-gray-500 font-medium">Không tìm thấy dự án nào</p>
           </div>
         ) : (
           filteredList.map((da) => (
             <div
               key={da.id}
-              className="bg-white rounded-xl shadow-sm overflow-hidden"
+              className="bg-white rounded-[32px] border border-white/5 overflow-hidden group/card hover:border-emerald-500/20 transition-all"
             >
-              {da.hinh_anh && da.hinh_anh.length > 0 && (
+              {da.hinh_anh && da.hinh_anh.length > 0 ? (
                 <div
-                  className="relative h-40 bg-gray-200 cursor-pointer"
+                  className="relative h-52 bg-slate-800 cursor-pointer overflow-hidden"
                   onClick={() => {
                     setShowCarousel(da.hinh_anh);
                     setCarouselIndex(0);
@@ -428,88 +423,96 @@ export default function DuAn() {
                   <img
                     src={da.hinh_anh[0]}
                     alt={da.ten}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
                   {da.hinh_anh.length > 1 && (
-                    <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                      +{da.hinh_anh.length - 1} ảnh
+                    <span className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full border border-white/10">
+                      +{da.hinh_anh.length - 1} ẢNH
                     </span>
                   )}
-                </div>
-              )}
-              <div className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-800 truncate">
-                      {da.ten}
-                    </h3>
-                    {da.chu_dau_tu && (
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        CĐT: {da.chu_dau_tu}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-                      <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span className="truncate">{da.vi_tri}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-emerald-600 font-medium mt-0.5">
-                      <DollarSign className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span>{da.gia}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${tienDoConfig[da.tien_do]?.color || "bg-gray-100 text-gray-700"}`}
-                    >
+                  <div className="absolute bottom-4 left-4">
+                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${tienDoConfig[da.tien_do]?.color || "bg-slate-800 text-gray-400"}`}>
                       {tienDoConfig[da.tien_do]?.label || da.tien_do}
                     </span>
-                    <div className="relative group/menu">
-                      <button className="p-1 hover:bg-gray-100 rounded">
-                        <MoreVertical className="w-4 h-4 text-gray-400" />
-                      </button>
-                      <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-10 min-w-[120px] border">
-                        <button
-                          onClick={() => handleCopyInfo(da)}
-                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <Copy className="w-3.5 h-3.5" /> Copy info
-                        </button>
-                        <button
-                          onClick={() => openEditForm(da)}
-                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          ✏️ Sửa
-                        </button>
-                        <button
-                          onClick={() => handleDeleteRequest(da.id)}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          🗑️ Xóa
-                        </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-2 bg-gradient-to-r from-emerald-500 to-blue-500"></div>
+              )}
+              
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-gray-100 text-xl leading-tight mb-1 group-hover/card:text-emerald-400 transition-colors">
+                      {da.ten}
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                      {da.chu_dau_tu && (
+                        <p className="text-xs font-bold text-gray-500 italic">
+                          CĐT: {da.chu_dau_tu}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1.5 text-sm text-gray-400">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className="truncate">{da.vi_tri}</span>
                       </div>
                     </div>
                   </div>
+                  <div className="relative group/menu">
+                    <button className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+                      <MoreVertical className="w-5 h-5 text-gray-500" />
+                    </button>
+                    <div className="absolute right-0 top-8 bg-slate-900 shadow-2xl rounded-2xl py-2 hidden group-hover/menu:block z-20 min-w-[150px] border border-white/10 overflow-hidden">
+                      <button
+                        onClick={() => handleCopyInfo(da)}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 flex items-center gap-2 text-gray-300 transition-colors"
+                      >
+                        <Copy className="w-4 h-4" /> Sao chép tin
+                      </button>
+                      <button
+                        onClick={() => openEditForm(da)}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 flex items-center gap-2 text-gray-300 transition-colors"
+                      >
+                        ✏️ Chỉnh sửa
+                      </button>
+                      <div className="h-px bg-white/5 my-1"></div>
+                      <button
+                        onClick={() => handleDeleteRequest(da.id)}
+                        className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+                      >
+                        🗑️ Xóa dự án
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1">
-                    <Home className="w-3 h-3" /> {da.loai_hinh}
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-slate-800/30 rounded-2xl p-3 border border-white/5">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase mb-1">Giá bán từ</p>
+                    <p className="text-lg font-black text-emerald-400">{da.gia}</p>
+                  </div>
+                  <div className="bg-slate-800/30 rounded-2xl p-3 border border-white/5">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase mb-1">Diện tích</p>
+                    <p className="text-lg font-black text-blue-400">{da.dien_tich || '---'}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-[10px] font-black bg-slate-800 text-gray-400 px-3 py-1.5 rounded-xl border border-white/5 uppercase tracking-wider">
+                    {da.loai_hinh}
                   </span>
-                  {da.dien_tich && (
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      📐 {da.dien_tich}
-                    </span>
-                  )}
                   {da.tien_ich &&
                     da.tien_ich.slice(0, 3).map((ti, i) => (
                       <span
                         key={i}
-                        className="text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded"
+                        className="text-[10px] font-black bg-emerald-500/10 text-emerald-500 px-3 py-1.5 rounded-xl border border-emerald-500/10 uppercase tracking-wider"
                       >
-                        ✓ {ti}
+                        {ti}
                       </span>
                     ))}
                   {da.tien_ich && da.tien_ich.length > 3 && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-[10px] font-black text-gray-500 self-center">
                       +{da.tien_ich.length - 3}
                     </span>
                   )}
@@ -519,6 +522,196 @@ export default function DuAn() {
           ))
         )}
       </div>
+
+      {/* Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end justify-center">
+          <div className="bg-slate-900 rounded-t-[32px] w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto shadow-2xl border-t border-white/10 animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-gray-100">
+                    {editingDuAn ? "Sửa dự án" : "Dự án mới"}
+                  </h2>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Thông tin chi tiết</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowForm(false)}
+                className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <button
+                type="button"
+                onClick={handleAIEnrich}
+                disabled={aiLoading || !form.ten.trim()}
+                className="w-full bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-4 py-4 rounded-2xl text-sm font-black hover:bg-indigo-600/30 disabled:opacity-30 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              >
+                {aiLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-5 h-5" />
+                )}
+                TỰ ĐỘNG ĐIỀN BẰNG AI (DEEPSEEK)
+              </button>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Tên dự án *</label>
+                <input
+                  type="text"
+                  value={form.ten}
+                  onChange={(e) => setForm({ ...form, ten: e.target.value })}
+                  className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm focus:ring-emerald-500"
+                  placeholder="VD: Vinhomes Grand Park"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Chủ đầu tư</label>
+                <input
+                  type="text"
+                  value={form.chu_dau_tu}
+                  onChange={(e) => setForm({ ...form, chu_dau_tu: e.target.value })}
+                  className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm focus:ring-emerald-500"
+                  placeholder="VD: Vingroup"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Vị trí *</label>
+                  <input
+                    type="text"
+                    value={form.vi_tri}
+                    onChange={(e) => setForm({ ...form, vi_tri: e.target.value })}
+                    className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm"
+                    placeholder="VD: Quận 9"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Giá bán *</label>
+                  <input
+                    type="text"
+                    value={form.gia}
+                    onChange={(e) => setForm({ ...form, gia: e.target.value })}
+                    className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm"
+                    placeholder="VD: 3.5 Tỷ"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Loại hình</label>
+                  <select
+                    value={form.loai_hinh}
+                    onChange={(e) => setForm({ ...form, loai_hinh: e.target.value })}
+                    className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm focus:ring-emerald-500"
+                  >
+                    {loaiHinhOptions.map((lh) => (
+                      <option key={lh} value={lh}>{lh}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Diện tích</label>
+                  <input
+                    type="text"
+                    value={form.dien_tich}
+                    onChange={(e) => setForm({ ...form, dien_tich: e.target.value })}
+                    className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm"
+                    placeholder="VD: 75m2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-1">Trạng thái dự án</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {tienDoOptions.map((td) => (
+                    <button
+                      key={td.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, tien_do: td.value })}
+                      className={`px-3 py-3 rounded-xl text-xs font-bold transition-all border ${
+                        form.tien_do === td.value
+                          ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/40"
+                          : "bg-slate-800 border-white/5 text-gray-400 hover:bg-slate-750"
+                      }`}
+                    >
+                      {td.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-1">Hình ảnh dự án ({form.hinh_anh.length}/10)</label>
+                <div className="flex flex-wrap gap-2">
+                  {form.hinh_anh.map((img, index) => (
+                    <div key={index} className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 shadow-lg group">
+                      <img src={img} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      >
+                        <X className="w-5 h-5 text-white" />
+                      </button>
+                    </div>
+                  ))}
+                  {form.hinh_anh.length < 10 && (
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="w-20 h-20 bg-slate-800 border-2 border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:border-emerald-500/50 hover:text-emerald-400 transition-all"
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="w-5 h-5" />
+                          <span className="text-[10px] font-bold mt-1 uppercase">Tải lên</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleUploadImage} />
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="flex-1 px-4 py-4 bg-slate-800 text-gray-400 rounded-2xl text-sm font-bold hover:bg-slate-750 transition-all"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-[2] px-4 py-4 bg-emerald-600 text-white rounded-2xl text-sm font-black hover:bg-emerald-500 active:scale-95 transition-all shadow-xl shadow-emerald-900/30 flex items-center justify-center gap-2"
+                >
+                  {saving ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : editingDuAn ? (
+                    "CẬP NHẬT DỰ ÁN"
+                  ) : (
+                    "LƯU DỰ ÁN"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Form Thêm/Sửa */}
       {showForm && (
