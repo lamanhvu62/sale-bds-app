@@ -163,25 +163,32 @@ export default function VoiceInput({ onSave, onClose }) {
 
                 {step === 'idle' && (
                     <div className="space-y-4 text-center">
-                        <div className="p-6 rounded-full bg-gray-50">
-                            <Mic className="w-16 h-16 mx-auto text-gray-400" />
+                        <div className="relative w-32 h-32 mx-auto cursor-pointer" onClick={startRecording}>
+                            <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-75"></div>
+                            <div className="relative flex items-center justify-center w-full h-full bg-emerald-500 rounded-full shadow-lg">
+                                <Mic className="w-12 h-12 text-white" />
+                            </div>
                         </div>
                         <p className="text-gray-600 font-medium">Nhấn nút để bắt đầu ghi âm</p>
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
                         <button onClick={startRecording} className="w-full bg-emerald-600 text-white py-3 rounded-lg text-sm font-medium hover:bg-emerald-700 flex items-center justify-center gap-2">
                             <Mic className="w-4 h-4" /> Bắt đầu nói
                         </button>
-                        <p className="text-xs text-gray-400">Ví dụ: "Anh Nguyễn Văn A, 0912345678, cần mua chung cư quận 2, ngân sách 2 đến 3 tỷ"</p>
                     </div>
                 )}
 
                 {step === 'recording' && (
                     <div className="space-y-4 text-center">
-                        <div className="p-6 rounded-full bg-emerald-50 animate-pulse">
-                            <Mic className="w-16 h-16 mx-auto text-emerald-600" />
+                        <div className="relative w-32 h-32 mx-auto">
+                            {/* Các vòng sóng */}
+                            <div className="mic-wave"></div>
+                            <div className="mic-wave delay-1"></div>
+                            <div className="mic-wave delay-2"></div>
+                            {/* Nút mic trung tâm */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-emerald-500 rounded-full shadow-lg">
+                                <Mic className="w-12 h-12 text-white" />
+                            </div>
                         </div>
                         <p className="text-gray-600 font-medium">Đang ghi âm... Hãy nói thông tin khách hàng</p>
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
                         <button onClick={stopRecording} className="w-full bg-red-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-red-600 flex items-center justify-center gap-2">
                             <Square className="w-4 h-4" /> Dừng và phân tích
                         </button>
@@ -190,16 +197,17 @@ export default function VoiceInput({ onSave, onClose }) {
 
                 {step === 'processing' && (
                     <div className="text-center py-8">
-                        <Loader2 className="w-10 h-10 text-emerald-600 animate-spin mx-auto mb-4" />
-                        <p className="text-gray-600 font-medium">Đang xử lý âm thanh...</p>
-                        {transcript && (
-                            <p className="text-sm text-gray-400 mt-2">Văn bản: {transcript}</p>
-                        )}
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce"></div>
+                            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                        </div>
+                        <p className="text-gray-600 font-medium">AI đang phân tích...</p>
                     </div>
                 )}
 
                 {step === 'result' && customerData && (
-                    <div className="space-y-4">
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="bg-emerald-50 rounded-lg p-3">
                             <p className="text-xs text-gray-600 mb-1">Nội dung đã nhận dạng:</p>
                             <p className="text-sm text-gray-800">{transcript}</p>
@@ -250,8 +258,8 @@ export default function VoiceInput({ onSave, onClose }) {
                                             <button key={key} type="button"
                                                 onClick={() => setCustomerData({ ...customerData, trangThai: key })}
                                                 className={`px-2 py-1 rounded-full text-xs font-medium transition-all ${customerData.trangThai === key
-                                                        ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
-                                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                                    ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
+                                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                                     }`}>
                                                 {value.label}
                                             </button>
