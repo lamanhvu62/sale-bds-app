@@ -3,8 +3,6 @@ import {
   Plus,
   Search,
   MapPin,
-  DollarSign,
-  Home,
   MoreVertical,
   X,
   Upload,
@@ -13,6 +11,8 @@ import {
   Copy,
   Check,
   Building2,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { supabase } from "../services/supabase";
 import BottomNav from "../components/BottomNav";
@@ -20,7 +20,6 @@ import { useToast } from "../components/Toast";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { DuAnSkeleton } from "../components/Skeleton";
 import { enrichProjectWithAI } from "../services/ai";
-import { Sparkles, Loader2 } from "lucide-react"; // nếu chưa có
 
 const loaiHinhOptions = [
   "Chung cư",
@@ -282,38 +281,37 @@ export default function DuAn() {
   };
 
   const handleAIEnrich = async () => {
-  setAiLoading(true);
-  try {
-    const enriched = await enrichProjectWithAI({
-      ten: form.ten,
-      chu_dau_tu: form.chu_dau_tu,
-      vi_tri: form.vi_tri,
-      gia: form.gia,
-      dien_tich: form.dien_tich,
-      loai_hinh: form.loai_hinh,
-    });
+    setAiLoading(true);
+    try {
+      const enriched = await enrichProjectWithAI({
+        ten: form.ten,
+        chu_dau_tu: form.chu_dau_tu,
+        vi_tri: form.vi_tri,
+        gia: form.gia,
+        dien_tich: form.dien_tich,
+        loai_hinh: form.loai_hinh,
+      });
 
-    // Cập nhật form với dữ liệu AI trả về, ưu tiên giữ lại những gì người dùng đã nhập
-    setForm(prev => ({
-      ...prev,
-      chu_dau_tu: prev.chu_dau_tu || enriched.chu_dau_tu || '',
-      vi_tri: prev.vi_tri || enriched.vi_tri || '',
-      gia: prev.gia || enriched.gia || '',
-      dien_tich: prev.dien_tich || enriched.dien_tich || '',
-      loai_hinh: prev.loai_hinh || enriched.loai_hinh || prev.loai_hinh,
-      tien_ich: prev.tien_ich.length > 0 ? prev.tien_ich : (enriched.tien_ich || []),
-      tien_do: prev.tien_do || enriched.tien_do || prev.tien_do,
-      mo_ta: prev.mo_ta || enriched.mo_ta || '',
-      link_tham_khao: prev.link_tham_khao || enriched.link_tham_khao || '',
-    }));
-    toast.success('Đã điền thông tin bằng AI! Hãy kiểm tra lại');
-  } catch (err) {
-    console.error('Lỗi AI:', err);
-    toast.error('Lỗi AI: ' + err.message);
-  } finally {
-    setAiLoading(false);
-  }
-};
+      setForm((prev) => ({
+        ...prev,
+        chu_dau_tu: prev.chu_dau_tu || enriched.chu_dau_tu || "",
+        vi_tri: prev.vi_tri || enriched.vi_tri || "",
+        gia: prev.gia || enriched.gia || "",
+        dien_tich: prev.dien_tich || enriched.dien_tich || "",
+        loai_hinh: prev.loai_hinh || enriched.loai_hinh || prev.loai_hinh,
+        tien_ich: prev.tien_ich.length > 0 ? prev.tien_ich : (enriched.tien_ich || []),
+        tien_do: prev.tien_do || enriched.tien_do || prev.tien_do,
+        mo_ta: prev.mo_ta || enriched.mo_ta || "",
+        link_tham_khao: prev.link_tham_khao || enriched.link_tham_khao || "",
+      }));
+      toast.success("Đã điền thông tin bằng AI! Hãy kiểm tra lại");
+    } catch (err) {
+      console.error("Lỗi AI:", err);
+      toast.error("Lỗi AI: " + err.message);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const stats = {
     tong: duAnList.length,
@@ -322,7 +320,7 @@ export default function DuAn() {
   };
 
   return (
-        <div className="pb-24 max-w-lg mx-auto">
+    <div className="pb-24 max-w-lg mx-auto">
       {/* Header & Stats */}
       <div className="glass-effect p-4 sticky top-0 z-20">
         <div className="flex items-center justify-between mb-5">
@@ -440,7 +438,7 @@ export default function DuAn() {
               ) : (
                 <div className="h-2 bg-gradient-to-r from-emerald-500 to-blue-500"></div>
               )}
-              
+
               <div className="p-6">
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex-1 min-w-0">
@@ -523,7 +521,7 @@ export default function DuAn() {
         )}
       </div>
 
-      {/* Form Modal */}
+      {/* Form Modal (Dark theme) */}
       {showForm && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end justify-center">
           <div className="bg-slate-900 rounded-t-[32px] w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto shadow-2xl border-t border-white/10 animate-in slide-in-from-bottom duration-300">
@@ -559,7 +557,7 @@ export default function DuAn() {
                 ) : (
                   <Sparkles className="w-5 h-5" />
                 )}
-                TỰ ĐỘNG ĐIỀN BẰNG AI (DEEPSEEK)
+                TỰ ĐỘNG ĐIỀN BẰNG AI (GEMINI)
               </button>
 
               <div>
@@ -643,7 +641,7 @@ export default function DuAn() {
                       className={`px-3 py-3 rounded-xl text-xs font-bold transition-all border ${
                         form.tien_do === td.value
                           ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/40"
-                          : "bg-slate-800 border-white/5 text-gray-400 hover:bg-slate-750"
+                          : "bg-slate-800 border-white/5 text-gray-400 hover:bg-slate-700"
                       }`}
                     >
                       {td.label}
@@ -652,6 +650,34 @@ export default function DuAn() {
                 </div>
               </div>
 
+              {/* Tiện ích */}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-1">Tiện ích</label>
+                <div className="flex flex-wrap gap-2">
+                  {tienIchOptions.map((ti) => (
+                    <button
+                      key={ti}
+                      type="button"
+                      onClick={() => {
+                        const newList = form.tien_ich.includes(ti)
+                          ? form.tien_ich.filter((t) => t !== ti)
+                          : [...form.tien_ich, ti];
+                        setForm({ ...form, tien_ich: newList });
+                      }}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        form.tien_ich.includes(ti)
+                          ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/30"
+                          : "bg-slate-800 border-white/5 text-gray-400 hover:bg-slate-700"
+                      }`}
+                    >
+                      {form.tien_ich.includes(ti) && <Check className="w-3 h-3 inline mr-1" />}
+                      {ti}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hình ảnh */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-1">Hình ảnh dự án ({form.hinh_anh.length}/10)</label>
                 <div className="flex flex-wrap gap-2">
@@ -676,7 +702,7 @@ export default function DuAn() {
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
                         <>
-                          <Plus className="w-5 h-5" />
+                          <Upload className="w-5 h-5" />
                           <span className="text-[10px] font-bold mt-1 uppercase">Tải lên</span>
                         </>
                       )}
@@ -686,10 +712,34 @@ export default function DuAn() {
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleUploadImage} />
               </div>
 
+              {/* Mô tả */}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Mô tả</label>
+                <textarea
+                  value={form.mo_ta}
+                  onChange={(e) => setForm({ ...form, mo_ta: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm focus:ring-emerald-500 resize-none"
+                  placeholder="Mô tả thêm về dự án..."
+                />
+              </div>
+
+              {/* Link tham khảo */}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Link tham khảo</label>
+                <input
+                  type="url"
+                  value={form.link_tham_khao}
+                  onChange={(e) => setForm({ ...form, link_tham_khao: e.target.value })}
+                  className="w-full px-4 py-3.5 bg-slate-800 border-white/5 rounded-2xl text-sm"
+                  placeholder="https://..."
+                />
+              </div>
+
               <div className="flex gap-4 pt-4">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="flex-1 px-4 py-4 bg-slate-800 text-gray-400 rounded-2xl text-sm font-bold hover:bg-slate-750 transition-all"
+                  className="flex-1 px-4 py-4 bg-slate-800 text-gray-400 rounded-2xl text-sm font-bold hover:bg-slate-700 transition-all"
                 >
                   Hủy
                 </button>
@@ -707,275 +757,6 @@ export default function DuAn() {
                   )}
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {/* Form Thêm/Sửa */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center">
-          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800">
-                {editingDuAn ? "Sửa dự án" : "Thêm dự án mới"}
-              </h2>
-              <button
-                onClick={() => setShowForm(false)}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <X className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tên dự án <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.ten}
-                  onChange={(e) => setForm({ ...form, ten: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="VD: Vinhomes Grand Park"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Chủ đầu tư
-                </label>
-                <input
-                  type="text"
-                  value={form.chu_dau_tu}
-                  onChange={(e) =>
-                    setForm({ ...form, chu_dau_tu: e.target.value })
-                  }
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="VD: Vingroup"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vị trí <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.vi_tri}
-                    onChange={(e) =>
-                      setForm({ ...form, vi_tri: e.target.value })
-                    }
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    placeholder="VD: Quận 9"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Giá <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.gia}
-                    onChange={(e) => setForm({ ...form, gia: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    placeholder="VD: 2-5 tỷ/căn"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Diện tích
-                  </label>
-                  <input
-                    type="text"
-                    value={form.dien_tich}
-                    onChange={(e) =>
-                      setForm({ ...form, dien_tich: e.target.value })
-                    }
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    placeholder="VD: 60-120m²"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Loại hình <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={form.loai_hinh}
-                    onChange={(e) =>
-                      setForm({ ...form, loai_hinh: e.target.value })
-                    }
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    {loaiHinhOptions.map((lh) => (
-                      <option key={lh} value={lh}>
-                        {lh}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tiến độ
-                </label>
-                <div className="flex gap-2 flex-wrap">
-                  {tienDoOptions.map((td) => (
-                    <button
-                      key={td.value}
-                      type="button"
-                      onClick={() => setForm({ ...form, tien_do: td.value })}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${form.tien_do === td.value ? "ring-2 ring-emerald-500 ring-offset-1 " + tienDoConfig[td.value].color : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
-                    >
-                      {td.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tiện ích
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {tienIchOptions.map((ti) => (
-                    <button
-                      key={ti}
-                      type="button"
-                      onClick={() => {
-                        const newList = form.tien_ich.includes(ti)
-                          ? form.tien_ich.filter((t) => t !== ti)
-                          : [...form.tien_ich, ti];
-                        setForm({ ...form, tien_ich: newList });
-                      }}
-                      className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition-all ${form.tien_ich.includes(ti) ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
-                    >
-                      {form.tien_ich.includes(ti) && (
-                        <Check className="w-3 h-3 inline mr-1" />
-                      )}
-                      {ti}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Hình ảnh ({form.hinh_anh.length}/10)
-                </label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {form.hinh_anh.map((img, index) => (
-                    <div
-                      key={index}
-                      className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200"
-                    >
-                      <img
-                        src={img}
-                        alt={`Ảnh ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        onClick={() => handleRemoveImage(index)}
-                        className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                  {form.hinh_anh.length < 10 && (
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-emerald-400 hover:text-emerald-500 transition-colors"
-                    >
-                      {uploading ? (
-                        <div className="animate-spin w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
-                      ) : (
-                        <>
-                          <Upload className="w-5 h-5" />
-                          <span className="text-xs mt-0.5">Thêm</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleUploadImage}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mô tả
-                </label>
-                <textarea
-                  value={form.mo_ta}
-                  onChange={(e) => setForm({ ...form, mo_ta: e.target.value })}
-                  rows={2}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-                  placeholder="Mô tả thêm về dự án..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Link tham khảo
-                </label>
-                <input
-                  type="url"
-                  value={form.link_tham_khao}
-                  onChange={(e) =>
-                    setForm({ ...form, link_tham_khao: e.target.value })
-                  }
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-            <div className=" mt-5 pt-3 border-t border-gray-100">
-              
-              <button
-                type="button"
-                onClick={handleAIEnrich}
-                disabled={aiLoading || !form.ten.trim()}
-                className="w-full mb-3 bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {aiLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Đang phân
-                    tích...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" /> Tự động điền bằng AI
-                  </>
-                )}
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {saving ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>{" "}
-                    Đang lưu...
-                  </>
-                ) : editingDuAn ? (
-                  "Cập nhật"
-                ) : (
-                  "Lưu dự án"
-                )}
-              </button>
-              <button
-                onClick={() => setShowForm(false)}
-                className="w-full mt-2 flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
-              >
-                Hủy
-              </button>
             </div>
           </div>
         </div>
