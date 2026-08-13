@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Mic, Loader2, X, Sparkles, Check } from 'lucide-react';
-import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
-import { parseCustomersWithAI } from '../services/ai';
+import { useState, useRef } from 'react';
+import { Mic, Loader2, X, Check, Square, RefreshCw, Sparkles } from 'lucide-react';
+import { supabase } from '../services/supabase';
+import { transcribeVoiceWithGemini } from '../services/ai';
 import { useToast } from './Toast';
 
 const trangThaiConfig = {
@@ -12,49 +12,121 @@ const trangThaiConfig = {
 };
 
 export default function VoiceInput({ onSave, onClose }) {
-    const [step, setStep] = useState('listening'); // listening | processing | result | saving
+    const [step, setStep] = useState('idle'); // idle | recording | processing | result | saving
+    const [isRecording, setIsRecording] = useState(false);
+    const [audioBlob, setAudioBlob] = useState(null);
+    const [audioUrl, setAudioUrl] = useState(null);
     const [customerData, setCustomerData] = useState(null);
+    const [transcript, setTranscript] = useState('');
     const [aiLoading, setAiLoading] = useState(false);
-    const { isListening, transcript, error, startListening, stopListening } = useSpeechRecognition();
+    const [error, setError] = useState(null);
+    const mediaRecorderRef = useRef(null);
+    const chunksRef = useRef([]);
+    const streamRef = useRef(null);
     const toast = useToast();
 
-    const handleStartListening = () => {
-        setStep('listening');
-        startListening();
+    const startRecording = async () => {
+        setError(null);
+        setTranscript('');
+        setCustomerData(null);
+        setAudioBlob(null);
+        setAudioUrl(null);
+        setStep('recording');
+        setIsRecording(true);
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream;
+
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+                ? 'audio/webm'
+                : 'audio/mp4';
+
+            const recorder = new MediaRecorder(stream, { mimeType });
+            mediaRecorderRef.current = recorder;
+            chunksRef.current = [];
+
+            recorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    chunksRef.current.push(event.data);
+                }
+            };
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunksRef.current, { type: mimeType });
+                setAudioBlob(blob);
+                setAudioUrl(URL.createObjectURL(blob));
+                setIsRecording(false);
+                // Tự động gọi AI phân tích
+                handleProcessAudio(blob, mimeType);
+            };
+
+            recorder.start();
+        } catch (err) {
+            console.error('Lỗi truy cập mic:', err);
+            setIsRecording(false);
+            setStep('idle');
+            if (err.name === 'NotAllowedError') {
+                setError('Bạn cần cấp quyền microphone');
+            } else {
+                setError('Không thể truy cập microphone: ' + err.message);
+            }
+        }
     };
 
-    const handleStopAndParse = async () => {
-        stopListening();
-        if (!transcript) {
-            toast.warning('Chưa nghe được nội dung, hãy thử lại');
-            return;
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            // Stop stream
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+            }
         }
+    };
+
+    const handleProcessAudio = async (blob, mimeType) => {
         setStep('processing');
         setAiLoading(true);
         try {
-            const aiResult = await parseCustomersWithAI(transcript);
+            // Chuyển blob thành base64
+            const base64 = await blobToBase64(blob);
+            const aiResult = await transcribeVoiceWithGemini(base64, mimeType);
             if (Array.isArray(aiResult) && aiResult.length > 0) {
-                // Lấy khách hàng đầu tiên (vì giọng nói thường chỉ 1 người)
+                const first = aiResult[0];
                 setCustomerData({
-                    ten: aiResult[0].ten || '',
-                    sdt: aiResult[0].sdt || '',
-                    nhuCau: aiResult[0].nhuCau || '',
-                    nganSach: aiResult[0].nganSach || '',
-                    khuVuc: aiResult[0].khuVuc || '',
-                    ghiChu: aiResult[0].ghiChu || '',
+                    ten: first.ten || '',
+                    sdt: first.sdt || '',
+                    nhuCau: first.nhuCau || '',
+                    nganSach: first.nganSach || '',
+                    khuVuc: first.khuVuc || '',
+                    ghiChu: first.ghiChu || '',
                     trangThai: 'tiem-nang',
                 });
+                setTranscript(first.ghiChu ? `${first.ten} ${first.sdt} ${first.nhuCau} ${first.nganSach} ${first.khuVuc} ${first.ghiChu}` : `${first.ten} ${first.sdt} ${first.nhuCau} ${first.nganSach} ${first.khuVuc}`);
                 setStep('result');
             } else {
-                toast.warning('Không tìm thấy khách hàng trong câu nói');
-                setStep('listening');
+                setError('Không tìm thấy thông tin khách hàng trong đoạn ghi âm');
+                setStep('idle');
             }
         } catch (err) {
-            toast.error('Lỗi AI: ' + err.message);
-            setStep('listening');
+            console.error('Lỗi xử lý audio:', err);
+            setError('Lỗi AI: ' + err.message);
+            setStep('idle');
         } finally {
             setAiLoading(false);
         }
+    };
+
+    const blobToBase64 = (blob) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
     };
 
     const handleSave = async () => {
@@ -63,9 +135,16 @@ export default function VoiceInput({ onSave, onClose }) {
             return;
         }
         setStep('saving');
-        // Gọi hàm onSave từ component cha
         await onSave(customerData);
-        // onSave sẽ tự đóng modal nếu thành công
+    };
+
+    const resetToIdle = () => {
+        setStep('idle');
+        setAudioBlob(null);
+        setAudioUrl(null);
+        setCustomerData(null);
+        setTranscript('');
+        setError(null);
     };
 
     return (
@@ -82,47 +161,47 @@ export default function VoiceInput({ onSave, onClose }) {
                     </button>
                 </div>
 
-                {step === 'listening' && (
+                {step === 'idle' && (
                     <div className="space-y-4 text-center">
-                        <div className={`p-6 rounded-full ${isListening ? 'bg-emerald-50 animate-pulse' : 'bg-gray-50'}`}>
-                            <Mic className={`w-16 h-16 mx-auto ${isListening ? 'text-emerald-600' : 'text-gray-400'}`} />
+                        <div className="p-6 rounded-full bg-gray-50">
+                            <Mic className="w-16 h-16 mx-auto text-gray-400" />
                         </div>
-                        <p className="text-gray-600 font-medium">
-                            {isListening ? 'Đang nghe... Hãy nói thông tin khách hàng' : 'Nhấn nút để bắt đầu nói'}
-                        </p>
-                        {transcript && (
-                            <div className="bg-gray-50 rounded-lg p-3 text-left">
-                                <p className="text-xs text-gray-400 mb-1">Nội dung đã nghe:</p>
-                                <p className="text-sm text-gray-700">{transcript}</p>
-                            </div>
-                        )}
+                        <p className="text-gray-600 font-medium">Nhấn nút để bắt đầu ghi âm</p>
                         {error && <p className="text-red-500 text-sm">{error}</p>}
-                        <div className="flex gap-3">
-                            {!isListening ? (
-                                <button onClick={handleStartListening} className="flex-1 bg-emerald-600 text-white py-3 rounded-lg text-sm font-medium hover:bg-emerald-700 flex items-center justify-center gap-2">
-                                    <Mic className="w-4 h-4" /> Bắt đầu nói
-                                </button>
-                            ) : (
-                                <button onClick={handleStopAndParse} className="flex-1 bg-gray-800 text-white py-3 rounded-lg text-sm font-medium hover:bg-gray-900 flex items-center justify-center gap-2">
-                                    <Check className="w-4 h-4" /> Nghe xong, phân tích
-                                </button>
-                            )}
-                        </div>
+                        <button onClick={startRecording} className="w-full bg-emerald-600 text-white py-3 rounded-lg text-sm font-medium hover:bg-emerald-700 flex items-center justify-center gap-2">
+                            <Mic className="w-4 h-4" /> Bắt đầu nói
+                        </button>
                         <p className="text-xs text-gray-400">Ví dụ: "Anh Nguyễn Văn A, 0912345678, cần mua chung cư quận 2, ngân sách 2 đến 3 tỷ"</p>
+                    </div>
+                )}
+
+                {step === 'recording' && (
+                    <div className="space-y-4 text-center">
+                        <div className="p-6 rounded-full bg-emerald-50 animate-pulse">
+                            <Mic className="w-16 h-16 mx-auto text-emerald-600" />
+                        </div>
+                        <p className="text-gray-600 font-medium">Đang ghi âm... Hãy nói thông tin khách hàng</p>
+                        {error && <p className="text-red-500 text-sm">{error}</p>}
+                        <button onClick={stopRecording} className="w-full bg-red-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-red-600 flex items-center justify-center gap-2">
+                            <Square className="w-4 h-4" /> Dừng và phân tích
+                        </button>
                     </div>
                 )}
 
                 {step === 'processing' && (
                     <div className="text-center py-8">
                         <Loader2 className="w-10 h-10 text-emerald-600 animate-spin mx-auto mb-4" />
-                        <p className="text-gray-600 font-medium">AI đang phân tích thông tin...</p>
+                        <p className="text-gray-600 font-medium">Đang xử lý âm thanh...</p>
+                        {transcript && (
+                            <p className="text-sm text-gray-400 mt-2">Văn bản: {transcript}</p>
+                        )}
                     </div>
                 )}
 
                 {step === 'result' && customerData && (
                     <div className="space-y-4">
                         <div className="bg-emerald-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-600 mb-1">Nội dung đã nghe:</p>
+                            <p className="text-xs text-gray-600 mb-1">Nội dung đã nhận dạng:</p>
                             <p className="text-sm text-gray-800">{transcript}</p>
                         </div>
                         <div className="bg-gray-50 rounded-xl p-4">
@@ -164,7 +243,6 @@ export default function VoiceInput({ onSave, onClose }) {
                                             className="w-full text-sm mt-0.5 bg-transparent focus:outline-none border-b border-gray-200" />
                                     </div>
                                 </div>
-                                {/* Trạng thái */}
                                 <div>
                                     <p className="text-xs text-gray-400 mb-1">📊 Trạng thái</p>
                                     <div className="flex gap-2 flex-wrap">
@@ -183,8 +261,8 @@ export default function VoiceInput({ onSave, onClose }) {
                             </div>
                         </div>
                         <div className="flex gap-3">
-                            <button onClick={() => setStep('listening')} className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
-                                ← Nghe lại
+                            <button onClick={resetToIdle} className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                                ← Ghi âm lại
                             </button>
                             <button onClick={handleSave} className="flex-[2] px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 flex items-center justify-center gap-2">
                                 <Check className="w-4 h-4" /> Lưu khách hàng

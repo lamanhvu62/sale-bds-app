@@ -64,3 +64,50 @@ Chỉ trả về mảng JSON, không markdown, không giải thích. Ví dụ ou
         throw new Error('AI trả về dữ liệu không đúng định dạng JSON');
     }
 }
+
+
+export async function transcribeVoiceWithGemini(audioBase64, mimeType) {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) throw new Error('Thiếu Gemini API Key trong file .env');
+
+    const prompt = `Bạn là trợ lý nhận dạng giọng nói và trích xuất thông tin khách hàng bất động sản.
+Từ đoạn ghi âm, hãy chuyển giọng nói thành văn bản, sau đó trích xuất thông tin khách hàng thành MỘT MẢNG JSON.
+Mỗi phần tử trong mảng là một object có các trường:
+- "ten": tên khách hàng (chuỗi rỗng nếu không có)
+- "sdt": số điện thoại (luôn bắt đầu bằng 0, bỏ mã +84, loại bỏ ký tự không phải số)
+- "nhuCau": nhu cầu (ví dụ: "Mua chung cư", "Mua nhà phố", "Mua đất nền", "Thuê chung cư"...), nếu không rõ để rỗng
+- "nganSach": ngân sách (ví dụ: "2-3 tỷ", "15 triệu/tháng"), nếu không có để rỗng
+- "khuVuc": khu vực quan tâm (ví dụ: "Quận 2", "Thủ Đức"), nếu không có để rỗng
+- "ghiChu": thông tin bổ sung, hoặc để rỗng
+
+Chỉ trả về mảng JSON, không markdown, không giải thích.`;
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [
+                {
+                    parts: [
+                        { text: prompt },
+                        { inlineData: { mimeType, data: audioBase64 } }
+                    ]
+                }
+            ],
+            generationConfig: {
+                temperature: 0,
+                maxOutputTokens: 2000,
+            }
+        }),
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || `Lỗi API (${response.status})`);
+    }
+
+    const data = await response.json();
+    const content = data.candidates[0].content.parts[0].text.trim();
+    const jsonStr = content.replace(/```json|```/g, '').trim();
+    return JSON.parse(jsonStr);
+}
