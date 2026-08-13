@@ -200,6 +200,7 @@ export default function QuickAddModal({ onClose, onSuccess }) {
       ghi_chu: parsed.ghiChu,
       trang_thai: parsed.trangThai,
       user_id: user.id,
+      last_contacted_at: new Date().toISOString(),
     };
 
     const { error } = await supabase.from('khach_hang').insert([khachData]);
@@ -383,8 +384,8 @@ export default function QuickAddModal({ onClose, onSuccess }) {
                       key={key}
                       onClick={() => setParsed({ ...parsed, trangThai: key })}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${parsed.trangThai === key
-                          ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
-                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        ? 'ring-2 ring-emerald-500 ring-offset-1 ' + value.color
+                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                     >
                       {value.label}

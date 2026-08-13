@@ -447,7 +447,7 @@ export default function LichHen() {
                       <button className="p-1.5 hover:bg-gray-100 rounded-full">
                         <MoreVertical className="w-4 h-4 text-gray-400" />
                       </button>
-                      <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-10 min-w-[100px] border">
+                      <div className="absolute right-0 top-6 bg-white shadow-lg rounded-lg py-1 hidden group-hover/menu:block z-20 min-w-[100px] border">
                         <button
                           onClick={() => openEditForm(appt)}
                           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"

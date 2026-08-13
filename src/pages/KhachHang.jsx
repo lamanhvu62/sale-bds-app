@@ -88,7 +88,17 @@ export default function KhachHang() {
 
   // Filter & search
   const filteredList = khachHangList.filter(kh => {
-    const matchStatus = filterStatus === 'all' || kh.trang_thai === filterStatus;
+    // Lọc theo trạng thái (gồm cả can-follow-up)
+    let matchStatus = true;
+    if (filterStatus === 'can-follow-up') {
+      const isPotential = kh.trang_thai === 'tiem-nang' || kh.trang_thai === 'dang-cham';
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      const isOverdue = !kh.last_contacted_at || new Date(kh.last_contacted_at) < threeDaysAgo;
+      matchStatus = isPotential && isOverdue;
+    } else {
+      matchStatus = filterStatus === 'all' || kh.trang_thai === filterStatus;
+    }
+
     const matchSearch = kh.ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
       kh.sdt.includes(searchTerm);
     return matchStatus && matchSearch;
@@ -139,6 +149,7 @@ export default function KhachHang() {
       nguon: form.nguon,
       ghi_chu: form.ghiChu,
       user_id: user.id,
+      last_contacted_at: new Date().toISOString(),
     };
 
     if (editingKhach) {
@@ -191,6 +202,26 @@ export default function KhachHang() {
     toast.success('Đã xóa khách hàng!');
     fetchKhachHang();
   };
+
+  const handleMarkContacted = async (id) => {
+    const { error } = await supabase
+      .from('khach_hang')
+      .update({ last_contacted_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) {
+      toast.error('Lỗi cập nhật: ' + error.message);
+    } else {
+      toast.success('Đã cập nhật liên hệ!');
+      fetchKhachHang();
+    }
+  };
+
+  const countCanFollowUp = khachHangList.filter(kh => {
+    const isPotential = kh.trang_thai === 'tiem-nang' || kh.trang_thai === 'dang-cham';
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    const isOverdue = !kh.last_contacted_at || new Date(kh.last_contacted_at) < threeDaysAgo;
+    return isPotential && isOverdue;
+  }).length;
 
   // Đếm nhanh
   const countByStatus = (status) => khachHangList.filter(kh => kh.trang_thai === status).length;
@@ -286,6 +317,13 @@ export default function KhachHang() {
           >
             Tất cả ({khachHangList.length})
           </button>
+          <button
+            onClick={() => setFilterStatus('can-follow-up')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${filterStatus === 'can-follow-up' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600'
+              }`}
+          >
+            Cần follow-up ({countCanFollowUp})
+          </button>
           {Object.entries(trangThaiConfig).map(([key, value]) => (
             <button
               key={key}
@@ -377,6 +415,12 @@ export default function KhachHang() {
                         className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                       >
                         💬 Nhắn tin
+                      </button>
+                      <button
+                        onClick={() => handleMarkContacted(kh.id)}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                      >
+                        ✅ Đã liên hệ
                       </button>
                     </div>
                   </div>

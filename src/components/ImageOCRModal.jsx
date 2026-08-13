@@ -165,6 +165,7 @@ export default function ImageOCRModal({ onClose, onSuccess }) {
                 ghi_chu: c.ghiChu || '',
                 trang_thai: c.trangThai || 'tiem-nang',
                 user_id: user.id,
+                last_contacted_at: new Date().toISOString(),
             };
             const { error } = await supabase.from('khach_hang').insert([khachData]);
             if (error) failCount++;

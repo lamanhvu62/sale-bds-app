@@ -151,6 +151,7 @@ File `.env` (không commit):
 - [x] Hiển thị badge trạng thái, context menu (Sửa/Xóa).
 - [x] Toast thông báo khi thao tác.
 - [x] ConfirmDialog khi xóa.
+- [x] Auto Follow-up: theo dõi lần liên hệ cuối, tự động phân loại khách cần gọi lại sau 3 ngày, nút "Đã liên hệ", filter "Cần follow-up".
 
 ### Dự án
 - [x] Thêm/sửa/xóa dự án (modal form).

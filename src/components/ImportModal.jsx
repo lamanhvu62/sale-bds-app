@@ -200,6 +200,7 @@ export default function ImportModal({ onClose, onSuccess }) {
           ghi_chu: '',
           trang_thai: 'tiem-nang',
           user_id: user.id,
+          last_contacted_at: new Date().toISOString(),
         };
 
         // Map các field không bắt buộc
@@ -258,8 +259,8 @@ export default function ImportModal({ onClose, onSuccess }) {
             {[1, 2, 3, 4].map((s) => (
               <div key={s} className="flex items-center gap-2 flex-1">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step > s ? 'bg-emerald-500 text-white' :
-                    step === s ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' :
-                      'bg-gray-200 text-gray-500'
+                  step === s ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' :
+                    'bg-gray-200 text-gray-500'
                   }`}>
                   {step > s ? <Check className="w-4 h-4" /> : s}
                 </div>
@@ -406,8 +407,8 @@ export default function ImportModal({ onClose, onSuccess }) {
                   }}
                   disabled={!hasRequiredFields()}
                   className={`flex-[2] px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${hasRequiredFields()
-                      ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                 >
                   {hasRequiredFields()

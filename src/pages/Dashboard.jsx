@@ -37,11 +37,14 @@ export default function Dashboard() {
         .from('khach_hang')
         .select('*', { count: 'exact', head: true });
 
-      // Khách cần follow-up (tiềm năng + đang chăm)
+      // Khách cần follow-up: trạng thái tiềm năng/đang chăm và đã quá 3 ngày chưa liên hệ
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+
       const { count: canFollowUp } = await supabase
         .from('khach_hang')
         .select('*', { count: 'exact', head: true })
-        .in('trang_thai', ['tiem-nang', 'dang-cham']);
+        .in('trang_thai', ['tiem-nang', 'dang-cham'])
+        .or(`last_contacted_at.lt.${threeDaysAgo},last_contacted_at.is.null`);
 
       // Tổng dự án
       const { count: tongDuAn } = await supabase
@@ -62,6 +65,8 @@ export default function Dashboard() {
         .gte('thoi_gian', `${today}T00:00:00`)
         .lte('thoi_gian', `${today}T23:59:59`)
         .eq('da_hoan_thanh', false);
+
+
 
       setStats({
         tongKhach: tongKhach || 0,
