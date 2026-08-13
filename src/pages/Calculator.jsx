@@ -38,26 +38,65 @@ export default function CalculatorPage() {
   };
 
   // Chuyển đổi mọi định dạng đầu vào thành số (number)
-  const toNumber = (value) => {
-    if (typeof value === 'number') return value;
-    if (!value) return 0;
+  // Chuyển đổi mọi định dạng đầu vào thành số (number)
+const toNumber = (value) => {
+  if (typeof value === 'number') return value;
+  if (!value) return 0;
 
-    const str = String(value).trim();
-    
-    // Nếu là số thuần (có thể có dấu .)
-    if (/^\d+\.?\d*$/.test(str)) {
-      return parseFloat(str);
+  const str = String(value).trim();
+
+  // Nếu là số thuần (chỉ có số và có thể một dấu chấm thập phân)
+  if (/^\d+(\.\d+)?$/.test(str)) {
+    return parseFloat(str);
+  }
+
+  // Lấy phần số và dấu phân cách
+  let cleaned = str.replace(/[^\d.,]/g, '');
+
+  // Xác định dấu thập phân
+  let decimalSeparator = '.';
+  if (cleaned.includes(',') && !cleaned.includes('.')) {
+    // Chỉ có dấu phẩy -> coi là dấu thập phân
+    decimalSeparator = ',';
+  } else if (cleaned.includes('.') && !cleaned.includes(',')) {
+    // Chỉ có dấu chấm -> có thể là thập phân hoặc phân cách hàng nghìn
+    const parts = cleaned.split('.');
+    if (parts.length === 2 && parts[1].length <= 2) {
+      decimalSeparator = '.';
+    } else {
+      // Coi là phân cách hàng nghìn -> loại bỏ dấu chấm
+      decimalSeparator = '';
     }
+  } else if (cleaned.includes(',') && cleaned.includes('.')) {
+    // Cả hai: ưu tiên dấu phẩy là thập phân nếu sau nó có 1-2 chữ số
+    const lastCommaIndex = cleaned.lastIndexOf(',');
+    const lastDotIndex = cleaned.lastIndexOf('.');
+    if (lastCommaIndex > lastDotIndex) {
+      decimalSeparator = ',';
+    } else {
+      decimalSeparator = '.';
+    }
+  }
 
-    // Parse từ định dạng có chữ "tỷ", "triệu", "tr", "VND", "₫"
-    const cleaned = str.replace(/[₫\sVND,\.]/gi, ''); // Xóa ký hiệu tiền tệ, dấu cách, dấu chấm (phân cách)
-    const num = parseFloat(cleaned.replace(/[^0-9.]/g, ''));
-    if (isNaN(num)) return 0;
+  let normalized;
+  if (decimalSeparator === ',') {
+    // Thay dấu phẩy thập phân thành dấu chấm, xóa dấu chấm phân cách
+    normalized = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (decimalSeparator === '.') {
+    // Xóa dấu phẩy phân cách (nếu có)
+    normalized = cleaned.replace(/,/g, '');
+  } else {
+    // Không có dấu thập phân, xóa tất cả dấu chấm phẩy
+    normalized = cleaned.replace(/[.,]/g, '');
+  }
 
-    if (/t[ỷyỉĩ]/i.test(str)) return num * 1e9;
-    if (/triệu|tr/i.test(str)) return num * 1e6;
-    return num;
-  };
+  const num = parseFloat(normalized);
+  if (isNaN(num)) return 0;
+
+  if (/t[ỷyỉĩ]/i.test(str)) return num * 1e9;
+  if (/triệu|tr/i.test(str)) return num * 1e6;
+  return num;
+};
 
   // Format hiển thị cho input (giữ nguyên giá trị người dùng nhập hoặc hiển thị số đã format)
   const displayMoneyInput = (value) => {
