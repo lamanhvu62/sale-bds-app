@@ -356,13 +356,12 @@ export default function LichHen() {
                   <button
                     key={`${wi}-${di}`}
                     onClick={() => setSelectedDate(day)}
-                    className={`h-7 flex flex-col items-center justify-center rounded-lg transition-all relative ${
-                      isSelected
+                    className={`h-7 flex flex-col items-center justify-center rounded-lg transition-all relative ${isSelected
                         ? 'bg-emerald-600 text-white shadow-sm'
                         : isToday
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                           : 'hover:bg-white/5 text-gray-400'
-                    }`}
+                      }`}
                   >
                     <span className="text-[10px] font-bold leading-none">{day.getDate()}</span>
                     {hasAppointments && (
@@ -403,9 +402,8 @@ export default function LichHen() {
             {dayAppointments.map((appt) => (
               <div
                 key={appt.id}
-                className={`bg-slate-900 rounded-2xl p-4 border border-slate-800 transition-all ${
-                  appt.da_hoan_thanh ? 'opacity-50' : 'hover:border-emerald-500/30'
-                }`}
+                className={`bg-slate-900 rounded-2xl p-4 border border-slate-800 transition-all ${appt.da_hoan_thanh ? 'opacity-50' : 'hover:border-emerald-500/30'
+                  }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -413,7 +411,7 @@ export default function LichHen() {
                       <Clock className="w-3.5 h-3.5 text-emerald-400" />
                       <span className="text-sm font-bold text-emerald-400">{formatTime(new Date(appt.thoi_gian))}</span>
                     </div>
-                    
+
                     <h4 className={`text-base font-bold leading-tight mb-2 ${appt.da_hoan_thanh ? 'line-through text-gray-500' : 'text-gray-100'}`}>
                       {appt.tieu_de}
                     </h4>
@@ -455,11 +453,10 @@ export default function LichHen() {
                   <div className="flex flex-col gap-2 shrink-0">
                     <button
                       onClick={() => toggleComplete(appt)}
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
-                        appt.da_hoan_thanh
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${appt.da_hoan_thanh
                           ? 'bg-emerald-500 text-white'
                           : 'bg-slate-800 text-slate-500 hover:bg-emerald-500/20 hover:text-emerald-400'
-                      }`}
+                        }`}
                       title={appt.da_hoan_thanh ? 'Đánh dấu chưa xong' : 'Đánh dấu đã xong'}
                     >
                       <Check className="w-4 h-4" />
@@ -487,7 +484,7 @@ export default function LichHen() {
 
       {/* ========== FORM MODAL ========== */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/60 z-30 flex items-end justify-center">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center">
           <div className="bg-slate-900 rounded-t-2xl w-full max-w-lg p-5 max-h-[85vh] overflow-y-auto shadow-2xl border-t border-slate-700">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-100">

@@ -148,7 +148,7 @@ export default function VoiceInput({ onSave, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center overflow-hidden">
             <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto overflow-x-hidden shadow-2xl box-border">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">

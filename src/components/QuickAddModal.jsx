@@ -229,7 +229,7 @@ export default function QuickAddModal({ onClose, onSuccess }) {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-20 flex items-end justify-center">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
       <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
 
         {/* Header */}
